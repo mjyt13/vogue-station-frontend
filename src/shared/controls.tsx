@@ -1,11 +1,26 @@
-import { type MouseEventHandler} from 'react'
-
-export const Controls = (props: {name: string, coord: number, onClickPlus: MouseEventHandler, onClickMinus: MouseEventHandler })=> {
-  return(
-    <div className='switcher'>
-      {props.name} = {props.coord}
-      <button onClick={props.onClickPlus}>+</button>
-      <button onClick={props.onClickMinus}>-</button>
-    </div>
+// A single generic slider. It knows nothing about x/y/z or position/rotation —
+// it just reports a number back through onChange. All 6 axis controls reuse it.
+export const AxisSlider = (props: {
+  label: string
+  value: number
+  min: number
+  max: number
+  step: number
+  onChange: (value: number) => void
+}) => {
+  return (
+    <label className="axis-slider" style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+      <span style={{ width: '5.5rem' }}>
+        {props.label} = {props.value.toFixed(2)}
+      </span>
+      <input
+        type="range"
+        min={props.min}
+        max={props.max}
+        step={props.step}
+        value={props.value}
+        onChange={(e) => props.onChange(Number(e.target.value))}
+      />
+    </label>
   )
 }

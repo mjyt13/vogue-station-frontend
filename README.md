@@ -1,77 +1,54 @@
-# React + TypeScript + Vite
+# Vogue Station - Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Web client for **Vogue Station**, a project where a user picks a garment
+(shirts, t-shirts, and later skirts/pants), applies patterns and colors, and
+previews the result on a 3D model / mannequin. See [docs/PLAN.md](docs/PLAN.md)
+for the full product vision.
 
-Currently, two official plugins are available:
+This repo is the frontend only. It is a pet project deliberately structured like
+a larger codebase (feature folders, barrel/facade exports, config-driven UI) so
+the workflow of building a real product can be practiced.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Stack
 
-## React Compiler
+- **React 19** + **TypeScript**
+- **Vite** (dev server, build) with the React Compiler enabled
+- **three.js** + **@react-three/fiber** for 3D rendering
+- **ESLint** (typescript-eslint, react-hooks, react-refresh)
 
-The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
+## Getting started
 
-Note: This will impact Vite dev & build performances.
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+```sh
+npm install
+npm run dev       # start the dev server (HMR)
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Other scripts:
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+```sh
+npm run build     # type-check (tsc -b) + production build
+npm run preview   # serve the production build locally
+npm run lint      # run ESLint
 ```
+
+Backend links and other environment-specific constants belong in a `.env` file
+(none are required yet for the local viewer).
+
+## The viewer
+
+The viewer loads a `.glb` garment and lets you move and rotate it with sliders
+for the X/Y/Z position and rotation axes, over a floor grid.
+
+Because uploaded models have unknown units and origins, `Model.tsx` normalizes
+each model on load: it measures the bounding box, recenters it on the origin,
+and scales it to a consistent world size (`TARGET_SIZE`). This guarantees a model
+is framed and visible regardless of how it was exported.
+
+### Roadmap (frontend)
+
+- Orbit/pan camera controls (drag to look around) alongside the sliders
+- A visible light source and adjustable lighting
+- Pattern and color selection panel
+- Draggable/resizable viewer window
+- Toggle between garment-only and clothed-mannequin views
+- User and admin cabinets; i18n (planned post-MVP)
