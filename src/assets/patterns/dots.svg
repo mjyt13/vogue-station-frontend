@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <rect width="256" height="256" fill="#f2f2f2"/>
+  <g fill="#8a8a8a">
+    <circle cx="64" cy="64" r="22"/>
+    <circle cx="192" cy="192" r="22"/>
+    <!-- corner dots complete into full circles across the seam -->
+    <circle cx="192" cy="64" r="22"/>
+    <circle cx="64" cy="192" r="22"/>
+  </g>
+</svg>

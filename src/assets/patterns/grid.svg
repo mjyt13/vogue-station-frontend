@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <rect width="256" height="256" fill="#f2f2f2"/>
+  <g stroke="#8a8a8a" stroke-width="12" fill="none">
+    <!-- edge lines land on the seam so tiles join cleanly -->
+    <path d="M0 0 H256 M0 128 H256 M0 256 H256"/>
+    <path d="M0 0 V256 M128 0 V256 M256 0 V256"/>
+  </g>
+</svg>
