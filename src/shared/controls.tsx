@@ -1,3 +1,5 @@
+import './controls.css'
+
 // A single generic slider. It knows nothing about x/y/z or position/rotation —
 // it just reports a number back through onChange. All 6 axis controls reuse it.
 export const AxisSlider = (props: {
@@ -9,8 +11,8 @@ export const AxisSlider = (props: {
   onChange: (value: number) => void
 }) => {
   return (
-    <label className="axis-slider" style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-      <span style={{ width: '5.5rem' }}>
+    <label className="axis-slider">
+      <span>
         {props.label} = {props.value.toFixed(2)}
       </span>
       <input

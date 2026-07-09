@@ -1,0 +1,17 @@
+.transform-panel {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.transform-panel fieldset {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  margin: 0;
+}
+
+.transform-panel legend {
+  padding: 0 0.4rem;
+  color: var(--text);
+}

@@ -14,8 +14,11 @@ function App() {
   return (
     <>
       <h1>Vogue Station — viewer</h1>
-      <Wardrobe material={material} onChange={patchMaterial} />
-      <Viewer modelUrl={tshirtUrl} material={material} />
+      <Viewer
+        modelUrl={tshirtUrl}
+        material={material}
+        controls={<Wardrobe material={material} onChange={patchMaterial} />}
+      />
     </>
   )
 }

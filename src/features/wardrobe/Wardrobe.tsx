@@ -3,6 +3,7 @@ import { SwatchPicker } from '../../shared/SwatchPicker'
 import type { Swatch } from '../../shared/SwatchPicker'
 import type { GarmentMaterial } from '../viewer'
 import { COLOR_PRESETS, PATTERN_PRESETS, PATTERN_SCALE } from './config'
+import './Wardrobe.css'
 
 // Catalog → picker options. Colors render a solid swatch; patterns render a
 // tiled image (or the "none" slash for url === null).
@@ -28,7 +29,7 @@ export function Wardrobe({
   onChange: (patch: Partial<GarmentMaterial>) => void
 }) {
   return (
-    <div id="wardrobe" className="toolbar">
+    <div className="wardrobe">
       <SwatchPicker
         label="color"
         value={material.color}

@@ -2,6 +2,7 @@ import { useGLTF } from '@react-three/drei'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Mesh } from 'three'
 import type { GarmentMaterial } from './types'
+import './UVMap.css'
 
 const SIZE = 480 // internal canvas resolution (drawn at 2x for crispness)
 const PAD = 20

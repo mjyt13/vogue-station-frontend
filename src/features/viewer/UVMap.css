@@ -1,0 +1,20 @@
+/* UV unwrap preview. */
+.uv-map {
+  margin: 0;
+  flex: none;
+}
+
+.uv-map canvas {
+  width: 240px;
+  height: 240px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.uv-map figcaption {
+  margin-top: 6px;
+  font-size: 13px;
+  color: var(--text);
+  max-width: 240px;
+}

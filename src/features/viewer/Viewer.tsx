@@ -1,12 +1,14 @@
 import { Bounds, Grid, OrbitControls } from '@react-three/drei'
 import { Canvas } from '@react-three/fiber'
 import { Suspense, useState } from 'react'
+import type { ReactNode } from 'react'
 import { Toggle } from '../../shared/Toggle'
 import { INITIAL_TRANSFORM } from './config'
 import { Model } from './Model'
 import { TransformPanel } from './TransformPanel'
 import { UVMap } from './UVMap'
 import type { Axis, GarmentMaterial, Kind, Transform } from './types'
+import './Viewer.css'
 
 // Scene options are viewer/camera concerns (not part of the garment material).
 // Config-driven like the sliders: one Toggle per entry, one handler.
@@ -26,7 +28,19 @@ const LIGHT_POS: [number, number, number] = [1.3, 1.6, 1.8]
 // The viewer renders a garment (given a GarmentMaterial) in a controllable 3D
 // scene. It owns the transform + scene-option state; the material comes from the
 // wardrobe via props, so the viewer knows nothing about the color/pattern catalog.
-export function Viewer({ modelUrl, material }: { modelUrl: string; material: GarmentMaterial }) {
+//
+// Layout: everything the user tweaks (the `controls` slot — App fills it with the
+// wardrobe — plus scene toggles, transform sliders, and the UV map) sits in the
+// left column; the 3D viewport is the right column.
+export function Viewer({
+  modelUrl,
+  material,
+  controls,
+}: {
+  modelUrl: string
+  material: GarmentMaterial
+  controls?: ReactNode
+}) {
   const [transform, setTransform] = useState<Transform>(INITIAL_TRANSFORM)
   const [scene, setScene] = useState<SceneOptions>(INITIAL_SCENE)
 
@@ -37,20 +51,27 @@ export function Viewer({ modelUrl, material }: { modelUrl: string; material: Gar
   const model = <Model url={modelUrl} transform={transform} material={material} />
 
   return (
-    <>
-      <div id="scene-options" className="toolbar">
-        {SCENE_TOGGLES.map(({ key, label }) => (
-          <Toggle
-            key={key}
-            label={label}
-            checked={scene[key]}
-            onChange={(checked) => setScene((prev) => ({ ...prev, [key]: checked }))}
-          />
-        ))}
+    <div className="workspace">
+      <div className="workspace__controls">
+        {controls}
+        <div className="scene-options">
+          {SCENE_TOGGLES.map(({ key, label }) => (
+            <Toggle
+              key={key}
+              label={label}
+              checked={scene[key]}
+              onChange={(checked) => setScene((prev) => ({ ...prev, [key]: checked }))}
+            />
+          ))}
+        </div>
+        <TransformPanel transform={transform} onChange={setAxis} />
+        <Suspense fallback={null}>
+          <UVMap url={modelUrl} material={material} />
+        </Suspense>
       </div>
-      <TransformPanel transform={transform} onChange={setAxis} />
-      <div style={{ display: 'flex', gap: '1rem', padding: '1rem', alignItems: 'flex-start' }}>
-        <div id="canvas-container" style={{ flex: 1, height: '500px' }}>
+
+      <div className="workspace__viewport">
+        <div className="viewport-canvas">
           <Canvas camera={{ position: [0, 1, 5], fov: 50 }}>
             <color attach="background" args={['#2b2f3a']} />
             <ambientLight intensity={0.6} />
@@ -81,10 +102,7 @@ export function Viewer({ modelUrl, material }: { modelUrl: string; material: Gar
             <OrbitControls makeDefault enableDamping enablePan={scene.pan} target={[0, 0, 0]} />
           </Canvas>
         </div>
-        <Suspense fallback={null}>
-          <UVMap url={modelUrl} material={material} />
-        </Suspense>
       </div>
-    </>
+    </div>
   )
 }

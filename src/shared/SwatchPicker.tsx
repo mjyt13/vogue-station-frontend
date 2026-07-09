@@ -1,3 +1,5 @@
+import './SwatchPicker.css'
+
 // A generic swatch dropdown. It knows nothing about garments — it takes a list
 // of options and reports the chosen value's key through onChange. Each option
 // renders a swatch: a solid `color`, a tiled `image`, or neither (a "none"

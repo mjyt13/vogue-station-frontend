@@ -1,0 +1,9 @@
+.axis-slider {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.axis-slider > span {
+  width: 5.5rem;
+}

@@ -1,6 +1,7 @@
 import { AxisSlider } from '../../shared/controls'
 import { AXES, GROUPS } from './config'
 import type { Axis, Kind, Transform } from './types'
+import './TransformPanel.css'
 
 // Renders every position/rotation slider from GROUPS × AXES. One onChange
 // carries (kind, axis, value) so a single handler upstream covers all 6 actions.
@@ -12,12 +13,9 @@ export function TransformPanel({
   onChange: (kind: Kind, axis: Axis, value: number) => void
 }) {
   return (
-    <div
-      id="controls"
-      style={{ display: 'flex', gap: '2rem', padding: '1rem', flexWrap: 'wrap' }}
-    >
+    <div className="transform-panel">
       {GROUPS.map(({ kind, min, max, step }) => (
-        <fieldset key={kind} style={{ border: '1px solid #888', padding: '0.5rem 1rem' }}>
+        <fieldset key={kind}>
           <legend>{kind}</legend>
           {AXES.map((axis) => (
             <AxisSlider

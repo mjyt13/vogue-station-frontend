@@ -1,3 +1,5 @@
+import './Toggle.css'
+
 // A generic on/off switch. Domain-agnostic: it just reports a boolean through
 // onChange. A styled checkbox, so it stays keyboard-accessible for free.
 export const Toggle = (props: {

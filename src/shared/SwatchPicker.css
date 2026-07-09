@@ -1,0 +1,78 @@
+/* Swatch dropdown. Opens on hover or keyboard focus. */
+.swatch-picker {
+  position: relative;
+  display: inline-block;
+  text-align: left;
+}
+
+.swatch-picker__trigger,
+.swatch-picker__option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 6px 10px;
+  font: inherit;
+  font-size: 15px;
+  color: var(--text-h);
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.swatch-picker__swatch {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  background-position: center;
+  flex: none;
+}
+
+/* "none" option: white with a red diagonal slash */
+.swatch-picker__swatch--none {
+  background:
+    linear-gradient(
+      to top right,
+      transparent calc(50% - 1px),
+      #d63a3a calc(50% - 1px),
+      #d63a3a calc(50% + 1px),
+      transparent calc(50% + 1px)
+    ),
+    #fff;
+}
+
+.swatch-picker__menu {
+  position: absolute;
+  z-index: 10;
+  top: calc(100% + 4px);
+  left: 0;
+  margin: 0;
+  padding: 4px;
+  list-style: none;
+  display: none;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+}
+
+.swatch-picker:hover .swatch-picker__menu,
+.swatch-picker:focus-within .swatch-picker__menu {
+  display: grid;
+}
+
+.swatch-picker__option {
+  background: transparent;
+  border-color: transparent;
+}
+
+.swatch-picker__option:hover,
+.swatch-picker__option[aria-selected='true'] {
+  background: var(--accent-bg);
+  border-color: var(--accent-border);
+}
