@@ -1,25 +1,26 @@
-import { useState } from 'react'
-import tshirtUrl from './assets/tshirt.glb?url'
-import { Viewer } from './features/viewer'
-import type { GarmentMaterial } from './features/viewer'
-import { INITIAL_MATERIAL, Wardrobe } from './features/wardrobe'
+import { Navigate, Route, Routes } from 'react-router-dom'
+import { AppLayout } from './app/AppLayout'
+import { LoginPage, PublicOnly, RegisterPage, RequireAuth } from './features/auth'
+import { CreatePage } from './features/create'
+import { LandingPage } from './features/landing'
 
-// App composes the features: the wardrobe produces a GarmentMaterial, the viewer
-// renders it. The material selection lives here, between the two.
+// Route map: a public landing at "/", public-only auth pages, and the editor
+// behind RequireAuth inside the app shell.
 function App() {
-  const [material, setMaterial] = useState<GarmentMaterial>(INITIAL_MATERIAL)
-  const patchMaterial = (patch: Partial<GarmentMaterial>) =>
-    setMaterial((prev) => ({ ...prev, ...patch }))
-
   return (
-    <>
-      <h1>Vogue Station — viewer</h1>
-      <Viewer
-        modelUrl={tshirtUrl}
-        material={material}
-        controls={<Wardrobe material={material} onChange={patchMaterial} />}
-      />
-    </>
+    <Routes>
+      <Route path="/" element={<LandingPage />} />
+      <Route element={<PublicOnly />}>
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+      </Route>
+      <Route element={<RequireAuth />}>
+        <Route element={<AppLayout />}>
+          <Route path="/create" element={<CreatePage />} />
+        </Route>
+      </Route>
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   )
 }
 

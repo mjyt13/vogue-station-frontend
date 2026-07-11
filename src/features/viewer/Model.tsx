@@ -1,20 +1,17 @@
-import { useGLTF, useTexture } from '@react-three/drei'
-import { useLayoutEffect, useMemo } from 'react'
+import { useGLTF } from '@react-three/drei'
+import { useEffect, useLayoutEffect, useMemo, useState } from 'react'
 import {
   Box3,
   Mesh,
   MeshStandardMaterial,
   RepeatWrapping,
   SRGBColorSpace,
+  Texture,
+  TextureLoader,
   Vector3,
 } from 'three'
 import { TARGET_SIZE } from './config'
 import type { GarmentMaterial, Transform } from './types'
-
-// A 1x1 white pixel. useTexture (a hook) can't be called conditionally, so when
-// there's no pattern we load this and simply don't assign it as a map.
-const BLANK =
-  'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=='
 
 // A single GLB garment placed under a user-driven transform.
 //
@@ -39,21 +36,33 @@ export function Model({
   const { position, rotation } = transform
   const patternUrl = material?.patternUrl ?? null
   const patternScale = material?.patternScale ?? 1
-  const rawTexture = useTexture(patternUrl ?? BLANK)
-  // Clone so we can configure this instance's sampler without mutating the
-  // cached hook value. RepeatWrapping is essential: the fabric UVs run past
-  // [0,1], so it tiles the pattern; without it they'd clamp to a flat edge color.
-  // High anisotropy keeps the tiling crisp where the surface is dense/angled.
-  // Re-runs on scale changes — cloning a texture is cheap (it shares the image).
-  const texture = useMemo(() => {
-    const t = rawTexture.clone()
-    t.colorSpace = SRGBColorSpace
-    t.wrapS = t.wrapT = RepeatWrapping
-    t.anisotropy = 16
-    t.repeat.set(patternScale, patternScale)
-    t.needsUpdate = true
-    return t
-  }, [rawTexture, patternScale])
+
+  // Load the pattern texture tolerantly: a broken or expired presigned URL falls
+  // back to no map (color only) instead of throwing and crashing the Canvas.
+  // Keyed by url so the "no pattern" case needs no synchronous setState.
+  const [loaded, setLoaded] = useState<{ url: string; texture: Texture } | null>(null)
+  useEffect(() => {
+    if (!patternUrl) return
+    let cancelled = false
+    new TextureLoader().load(
+      patternUrl,
+      (texture) => {
+        if (cancelled) return texture.dispose()
+        texture.colorSpace = SRGBColorSpace
+        texture.wrapS = texture.wrapT = RepeatWrapping
+        texture.anisotropy = 16
+        setLoaded({ url: patternUrl, texture })
+      },
+      undefined,
+      () => {
+        if (!cancelled) setLoaded(null) // broken/expired pattern → color only
+      },
+    )
+    return () => {
+      cancelled = true
+    }
+  }, [patternUrl])
+  const texture = loaded && loaded.url === patternUrl ? loaded.texture : null
 
   const { root, offset, scale } = useMemo(() => {
     const root = scene.clone(true)
@@ -74,14 +83,16 @@ export function Model({
   }, [scene])
 
   useLayoutEffect(() => {
+    // repeat is a sampler param applied per-frame — no re-upload (needsUpdate) needed.
+    texture?.repeat.set(patternScale, patternScale)
     root.traverse((obj) => {
       if (!(obj instanceof Mesh)) return
       const mat = obj.material as MeshStandardMaterial
       if (material?.color) mat.color.set(material.color)
-      mat.map = patternUrl ? texture : null // toggling a map changes the shader…
-      mat.needsUpdate = true // …so recompile is required
+      mat.map = texture // null → color only; toggling a map recompiles the shader
+      mat.needsUpdate = true
     })
-  }, [root, material?.color, patternUrl, texture])
+  }, [root, material?.color, texture, patternScale])
 
   // Outer group = user transform; inner group = fit-to-view normalization.
   return (

@@ -31,8 +31,11 @@ npm run preview   # serve the production build locally
 npm run lint      # run ESLint
 ```
 
-Backend links and other environment-specific constants belong in a `.env` file
-(none are required yet for the local viewer).
+Environment-specific constants belong in a `.env` file (copy `.env.example`).
+The app talks to the `vogue-station-backend` API at `VITE_API_URL`
+(default `http://localhost:3000`); see [docs/BACKEND_API.md](docs/BACKEND_API.md)
+for running the backend and the auth/data flow. Regenerate the typed API client
+after backend DTO changes with `npm run api:types`.
 
 ## The viewer
 

@@ -1,0 +1,10 @@
+.create-status {
+  padding: 12vh 1rem;
+  text-align: center;
+  font-size: 18px;
+  color: var(--text);
+}
+
+.create-status--error {
+  color: #d63a3a;
+}

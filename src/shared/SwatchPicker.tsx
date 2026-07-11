@@ -7,11 +7,6 @@ import './SwatchPicker.css'
 // open/close state. Used for both color and pattern pickers.
 export type Swatch = { key: string; name: string; color?: string; image?: string | null }
 
-const swatchStyle = (s: Swatch) => {
-  if (s.color) return { background: s.color }
-  if (s.image) return { backgroundImage: `url(${s.image})`, backgroundSize: '100% 100%' }
-  return undefined // "none" — styled via the --none modifier class
-}
 
 export const SwatchPicker = (props: {
   label: string
@@ -48,11 +43,19 @@ export const SwatchPicker = (props: {
 }
 
 const Dot = ({ swatch }: { swatch?: Swatch }) => {
+  // Image swatches use <img crossorigin> (a CORS request) rather than a CSS
+  // background: presigned MinIO images are cross-origin, and a no-cors CSS
+  // background gets blocked by the browser's Opaque Response Blocking (ORB).
+  if (swatch?.image) {
+    return (
+      <img className="swatch-picker__swatch" src={swatch.image} alt="" crossOrigin="anonymous" />
+    )
+  }
   const none = swatch && !swatch.color && !swatch.image
   return (
     <span
       className={`swatch-picker__swatch${none ? ' swatch-picker__swatch--none' : ''}`}
-      style={swatch && swatchStyle(swatch)}
+      style={swatch?.color ? { background: swatch.color } : undefined}
     />
   )
 }
