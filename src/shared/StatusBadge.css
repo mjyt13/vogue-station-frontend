@@ -1,0 +1,27 @@
+.status-badge {
+  align-self: flex-start;
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.status-badge--private {
+  color: var(--text);
+  background: var(--border);
+}
+
+.status-badge--review {
+  color: #8a5a00;
+  background: rgba(224, 138, 43, 0.18);
+}
+
+.status-badge--rejected {
+  color: #b32e2e;
+  background: rgba(214, 58, 58, 0.16);
+}
+
+.status-badge--public {
+  color: #1f7a3d;
+  background: rgba(58, 157, 84, 0.18);
+}

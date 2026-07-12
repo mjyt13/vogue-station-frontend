@@ -1,7 +1,10 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { AppLayout } from './app/AppLayout'
-import { LoginPage, PublicOnly, RegisterPage, RequireAuth } from './features/auth'
+import { AdminPage } from './features/admin'
+import { LoginPage, PublicOnly, RegisterPage, RequireAdmin, RequireAuth } from './features/auth'
+import { CabinetPage } from './features/cabinet'
 import { CreatePage } from './features/create'
+import { GalleryPage } from './features/gallery'
 import { LandingPage } from './features/landing'
 
 // Route map: a public landing at "/", public-only auth pages, and the editor
@@ -16,7 +19,12 @@ function App() {
       </Route>
       <Route element={<RequireAuth />}>
         <Route element={<AppLayout />}>
+          <Route path="/cabinet" element={<CabinetPage />} />
           <Route path="/create" element={<CreatePage />} />
+          <Route path="/gallery" element={<GalleryPage />} />
+          <Route element={<RequireAdmin />}>
+            <Route path="/admin" element={<AdminPage />} />
+          </Route>
         </Route>
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />

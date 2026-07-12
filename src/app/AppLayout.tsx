@@ -14,6 +14,9 @@ export function AppLayout() {
         </Link>
         <nav className="app-nav">
           <NavLink to="/create">Create</NavLink>
+          <NavLink to="/gallery">Gallery</NavLink>
+          <NavLink to="/cabinet">Cabinet</NavLink>
+          {user?.role === 'ADMIN' && <NavLink to="/admin">Admin</NavLink>}
         </nav>
         <div className="app-user">
           {user && <span className="app-user__email">{user.email}</span>}

@@ -5,6 +5,7 @@ export { getApiErrorMessage } from './errors'
 export type {
   AuthResponse,
   ColorResponse,
+  CreateLookDto,
   GarmentMaterialDto,
   LookResponse,
   ModelDetailResponse,

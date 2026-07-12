@@ -4,3 +4,14 @@
   flex-wrap: wrap;
   align-items: center;
 }
+
+.wardrobe__add {
+  padding: 6px 10px;
+  font: inherit;
+  font-size: 14px;
+  color: var(--text-h);
+  background: var(--bg);
+  border: 1px dashed var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+}

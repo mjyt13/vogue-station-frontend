@@ -2,6 +2,7 @@ import { Bounds, Grid, OrbitControls } from '@react-three/drei'
 import { Canvas } from '@react-three/fiber'
 import { Suspense, useState } from 'react'
 import type { ReactNode } from 'react'
+import { ErrorBoundary } from '../../shared/ErrorBoundary'
 import { Toggle } from '../../shared/Toggle'
 import { INITIAL_TRANSFORM } from './config'
 import { Model } from './Model'
@@ -72,7 +73,18 @@ export function Viewer({
 
       <div className="workspace__viewport">
         <div className="viewport-canvas">
-          <Canvas camera={{ position: [0, 1, 5], fov: 50 }}>
+          <ErrorBoundary
+            resetKeys={[modelUrl]}
+            fallback={(reset) => (
+              <div className="viewport-error">
+                <p>Couldn’t load the 3D preview.</p>
+                <button type="button" onClick={reset}>
+                  Retry
+                </button>
+              </div>
+            )}
+          >
+            <Canvas camera={{ position: [0, 1, 5], fov: 50 }}>
             <color attach="background" args={['#2b2f3a']} />
             <ambientLight intensity={0.6} />
             <directionalLight position={LIGHT_POS} intensity={1.2} />
@@ -100,7 +112,8 @@ export function Viewer({
               )}
             </Suspense>
             <OrbitControls makeDefault enableDamping enablePan={scene.pan} target={[0, 0, 0]} />
-          </Canvas>
+            </Canvas>
+          </ErrorBoundary>
         </div>
       </div>
     </div>

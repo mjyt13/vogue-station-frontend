@@ -2,6 +2,8 @@ import { AxisSlider } from '../../shared/controls'
 import { SwatchPicker } from '../../shared/SwatchPicker'
 import type { Swatch } from '../../shared/SwatchPicker'
 import { PATTERN_SCALE } from './config'
+import { CreateColorDialog } from './CreateColorDialog'
+import { UploadPatternDialog } from './UploadPatternDialog'
 import './Wardrobe.css'
 
 export type WardrobeColor = { id: string; name: string; hex: string }
@@ -46,12 +48,14 @@ export function Wardrobe({
           if (color) onColor(color)
         }}
       />
+      <CreateColorDialog />
       <SwatchPicker
         label="pattern"
         value={selectedPatternId ?? ''}
         options={patternSwatches}
         onChange={(id) => onPattern(id || null)}
       />
+      <UploadPatternDialog />
       {selectedPatternId && (
         <AxisSlider
           label="scale"

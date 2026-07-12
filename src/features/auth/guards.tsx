@@ -10,6 +10,15 @@ export function RequireAuth() {
   return <Outlet />
 }
 
+// Admin-only routes: authenticated non-admins are bounced to the editor.
+export function RequireAdmin() {
+  const { status, user } = useAuth()
+  if (status === 'loading') return <div className="auth-loading">Loading…</div>
+  if (status === 'anonymous') return <Navigate to="/login" replace />
+  if (user?.role !== 'ADMIN') return <Navigate to="/create" replace />
+  return <Outlet />
+}
+
 // Inverse gate: keep logged-in users off the login/register pages, sending them
 // to the editor (the authenticated home). Redirecting here — rather than each
 // form navigating — avoids racing this guard on the status change.

@@ -8,3 +8,51 @@
 .create-status--error {
   color: #d63a3a;
 }
+
+.save-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-self: flex-start;
+}
+
+.save-controls__editing {
+  font-size: 14px;
+  color: var(--text);
+}
+
+.save-controls__editing strong {
+  color: var(--text-h);
+}
+
+.save-controls__buttons {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.save-controls__primary,
+.save-controls__secondary {
+  padding: 8px 16px;
+  font: inherit;
+  font-weight: 500;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.save-controls__primary {
+  color: #fff;
+  background: var(--accent);
+  border: 1px solid var(--accent);
+}
+
+.save-controls__secondary {
+  color: var(--text-h);
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+}
+
+.save-controls__primary:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
