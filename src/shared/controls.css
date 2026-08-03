@@ -1,9 +1,17 @@
 .axis-slider {
   display: flex;
-  gap: 0.5rem;
+  gap: 10px;
   align-items: center;
 }
 
 .axis-slider > span {
   width: 5.5rem;
+  font-family: var(--ed-font-mono);
+  font-size: 0.78rem;
+  color: var(--ed-muted);
+}
+
+.axis-slider input[type='range'] {
+  flex: 1;
+  accent-color: var(--ed-accent);
 }

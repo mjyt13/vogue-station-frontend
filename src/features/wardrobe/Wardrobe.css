@@ -1,17 +1,37 @@
 .wardrobe {
   display: flex;
-  gap: 1rem;
-  flex-wrap: wrap;
-  align-items: center;
+  flex-direction: column;
+  gap: 12px;
+  border: 1px solid var(--ed-rule);
+  background: var(--ed-bg-raised);
+  padding: 18px 20px;
+}
+
+/* Each row is the same two-column stripe: a fixed-width name chip (from
+   SwatchPicker), then a fixed-width action button — so model/color/pattern
+   line up as a grid instead of each hugging its own label's length. */
+.wardrobe__row {
+  display: flex;
+  gap: 10px;
 }
 
 .wardrobe__add {
-  padding: 6px 10px;
+  width: 100px;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 9px 13px;
   font: inherit;
-  font-size: 14px;
-  color: var(--text-h);
-  background: var(--bg);
-  border: 1px dashed var(--border);
-  border-radius: 6px;
+  font-family: var(--ed-font-body);
+  font-size: 0.86rem;
+  color: var(--ed-muted);
+  background: var(--ed-bg-raised);
+  border: 1px dashed var(--ed-rule);
   cursor: pointer;
+}
+
+.wardrobe__add:hover {
+  border-color: var(--ed-fg);
+  color: var(--ed-fg);
 }

@@ -1,8 +1,9 @@
 .create-status {
   padding: 12vh 1rem;
   text-align: center;
+  font-family: var(--ed-font-body);
   font-size: 18px;
-  color: var(--text);
+  color: var(--ed-muted);
 }
 
 .create-status--error {
@@ -12,44 +13,58 @@
 .save-controls {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-  align-self: flex-start;
+  gap: 12px;
+  align-self: stretch;
+  font-family: var(--ed-font-body);
 }
 
 .save-controls__editing {
-  font-size: 14px;
-  color: var(--text);
+  font-family: var(--ed-font-mono);
+  font-size: 0.8rem;
+  color: var(--ed-muted);
 }
 
 .save-controls__editing strong {
-  color: var(--text-h);
+  color: var(--ed-fg);
+  font-weight: 500;
 }
 
 .save-controls__buttons {
   display: flex;
-  gap: 0.5rem;
+  gap: 10px;
   flex-wrap: wrap;
 }
 
 .save-controls__primary,
 .save-controls__secondary {
-  padding: 8px 16px;
+  flex: 1;
+  padding: 13px 18px;
   font: inherit;
-  font-weight: 500;
-  border-radius: 8px;
+  font-family: var(--ed-font-body);
+  font-weight: 600;
+  font-size: 0.95rem;
   cursor: pointer;
 }
 
 .save-controls__primary {
-  color: #fff;
-  background: var(--accent);
-  border: 1px solid var(--accent);
+  color: var(--ed-accent-fg);
+  background: var(--ed-accent);
+  border: 1px solid var(--ed-accent);
+}
+
+.save-controls__primary:hover {
+  background: var(--ed-accent-deep);
+  border-color: var(--ed-accent-deep);
 }
 
 .save-controls__secondary {
-  color: var(--text-h);
-  background: var(--code-bg);
-  border: 1px solid var(--border);
+  color: var(--ed-fg);
+  background: transparent;
+  border: 1px solid var(--ed-rule);
+}
+
+.save-controls__secondary:hover {
+  border-color: var(--ed-fg);
 }
 
 .save-controls__primary:disabled {

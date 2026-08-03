@@ -3,6 +3,8 @@
   position: relative;
   display: inline-block;
   text-align: left;
+  width: 208px;
+  flex: none;
 }
 
 .swatch-picker__trigger,
@@ -11,22 +13,39 @@
   align-items: center;
   gap: 8px;
   width: 100%;
-  padding: 6px 10px;
+  box-sizing: border-box;
+  padding: 9px 13px;
   font: inherit;
-  font-size: 15px;
-  color: var(--text-h);
-  background: var(--code-bg);
-  border: 1px solid var(--border);
-  border-radius: 6px;
+  font-family: var(--ed-font-body);
+  font-size: 0.86rem;
+  color: var(--ed-fg);
+  background: var(--ed-bg-raised);
+  border: 1px solid var(--ed-rule);
   cursor: pointer;
   white-space: nowrap;
+}
+
+.swatch-picker__label {
+  color: var(--ed-muted);
+  flex: none;
+}
+
+/* Crop the picked entity's name instead of letting a long upload title
+   stretch the chip: the value fills whatever room is left in the fixed-width
+   trigger — short names just leave blank space, long ones get an ellipsis. */
+.swatch-picker__value {
+  font-weight: 600;
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 .swatch-picker__swatch {
   width: 16px;
   height: 16px;
-  border-radius: 4px;
-  border: 1px solid var(--border);
+  border: 1px solid var(--ed-rule);
   background-position: center;
   object-fit: cover;
   flex: none;
@@ -67,10 +86,9 @@
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 2px;
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  box-shadow: var(--shadow);
+  background: var(--ed-bg-raised);
+  border: 1px solid var(--ed-rule);
+  box-shadow: var(--ed-shadow);
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
@@ -91,12 +109,13 @@
 }
 
 .swatch-picker__option {
+  width: auto;
   background: transparent;
   border-color: transparent;
 }
 
 .swatch-picker__option:hover,
 .swatch-picker__option[aria-selected='true'] {
-  background: var(--accent-bg);
-  border-color: var(--accent-border);
+  background: var(--ed-accent-bg);
+  border-color: var(--ed-accent-border);
 }

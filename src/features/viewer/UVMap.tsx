@@ -101,7 +101,7 @@ export function UVMap({ url, material }: { url: string; material: GarmentMateria
     ctx.stroke()
 
     // Reference: one [0,1] texture tile. UVs spilling past it => the tile repeats.
-    ctx.strokeStyle = 'rgba(58,110,214,0.9)'
+    ctx.strokeStyle = 'rgba(168,129,60,0.9)'
     ctx.setLineDash([5, 4])
     ctx.lineWidth = 1.5
     ctx.strokeRect(x(0), y(1), 1 * k, 1 * k)

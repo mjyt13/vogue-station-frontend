@@ -52,30 +52,36 @@ export function Wardrobe({
 
   return (
     <div className="wardrobe">
-      <SwatchPicker
-        label="model"
-        value={selectedModelId ?? ''}
-        options={modelSwatches}
-        onChange={onModel}
-      />
-      <UploadModelDialog />
-      <SwatchPicker
-        label="color"
-        value={selectedColorId ?? ''}
-        options={colorSwatches}
-        onChange={(id) => {
-          const color = colors.find((c) => c.id === id)
-          if (color) onColor(color)
-        }}
-      />
-      <CreateColorDialog />
-      <SwatchPicker
-        label="pattern"
-        value={selectedPatternId ?? ''}
-        options={patternSwatches}
-        onChange={(id) => onPattern(id || null)}
-      />
-      <UploadPatternDialog />
+      <div className="wardrobe__row">
+        <SwatchPicker
+          label="model"
+          value={selectedModelId ?? ''}
+          options={modelSwatches}
+          onChange={onModel}
+        />
+        <UploadModelDialog />
+      </div>
+      <div className="wardrobe__row">
+        <SwatchPicker
+          label="color"
+          value={selectedColorId ?? ''}
+          options={colorSwatches}
+          onChange={(id) => {
+            const color = colors.find((c) => c.id === id)
+            if (color) onColor(color)
+          }}
+        />
+        <CreateColorDialog />
+      </div>
+      <div className="wardrobe__row">
+        <SwatchPicker
+          label="pattern"
+          value={selectedPatternId ?? ''}
+          options={patternSwatches}
+          onChange={(id) => onPattern(id || null)}
+        />
+        <UploadPatternDialog />
+      </div>
       {selectedPatternId && (
         <AxisSlider
           label="scale"

@@ -37,10 +37,12 @@ export function Viewer({
   modelUrl,
   material,
   controls,
+  caption,
 }: {
   modelUrl: string
   material: GarmentMaterial
   controls?: ReactNode
+  caption?: ReactNode
 }) {
   const [transform, setTransform] = useState<Transform>(INITIAL_TRANSFORM)
   const [scene, setScene] = useState<SceneOptions>(INITIAL_SCENE)
@@ -115,6 +117,7 @@ export function Viewer({
             </Canvas>
           </ErrorBoundary>
         </div>
+        {caption && <div className="viewport-caption">{caption}</div>}
       </div>
     </div>
   )

@@ -1,3 +1,95 @@
+/* Editorial redesign tokens (landing + editor + shared app chrome). Additive
+   and namespaced `--ed-*` so it never collides with the original tokens
+   below, which other pages (cabinet/gallery/admin/auth) still use as-is. */
+@font-face {
+  font-family: 'Bodoni Moda';
+  font-style: normal;
+  font-weight: 400 700;
+  src: url('./assets/fonts/bodoni-moda-variable.woff2') format('woff2');
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Bodoni Moda';
+  font-style: italic;
+  font-weight: 400;
+  src: url('./assets/fonts/bodoni-moda-italic-400.woff2') format('woff2');
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Bodoni Moda';
+  font-style: italic;
+  font-weight: 600;
+  src: url('./assets/fonts/bodoni-moda-italic-600.woff2') format('woff2');
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Archivo';
+  font-style: normal;
+  font-weight: 400 700;
+  src: url('./assets/fonts/archivo-variable.woff2') format('woff2');
+  font-display: swap;
+}
+@font-face {
+  font-family: 'IBM Plex Mono';
+  font-style: normal;
+  font-weight: 400;
+  src: url('./assets/fonts/ibm-plex-mono-400.woff2') format('woff2');
+  font-display: swap;
+}
+@font-face {
+  font-family: 'IBM Plex Mono';
+  font-style: normal;
+  font-weight: 500;
+  src: url('./assets/fonts/ibm-plex-mono-500.woff2') format('woff2');
+  font-display: swap;
+}
+
+:root {
+  --ed-font-display: 'Bodoni Moda', serif;
+  --ed-font-body: 'Archivo', sans-serif;
+  --ed-font-mono: 'IBM Plex Mono', monospace;
+
+  --ed-bg: #f4f3f5;
+  --ed-bg-raised: #ffffff;
+  --ed-fg: #131316;
+  --ed-muted: #6b6770;
+  --ed-rule: #d8d5db;
+  --ed-accent: #a8813c;
+  --ed-accent-deep: #7c5f28;
+  --ed-accent-fg: #f4f3f5;
+  --ed-accent-bg: rgba(168, 129, 60, 0.12);
+  --ed-accent-border: rgba(168, 129, 60, 0.5);
+
+  --ed-backstage-bg: #131316;
+  --ed-backstage-fg: #f1eff2;
+  --ed-backstage-muted: #ada9b2;
+  --ed-backstage-rule: #322f35;
+
+  --ed-shadow: 0 30px 60px -25px rgba(19, 19, 22, 0.35);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ed-bg: #131316;
+    --ed-bg-raised: #1b1a1e;
+    --ed-fg: #f1eff2;
+    --ed-muted: #ada9b2;
+    --ed-rule: #322f35;
+    --ed-accent: #c9a15c;
+    --ed-accent-deep: #e4c077;
+    --ed-accent-fg: #131316;
+    --ed-accent-bg: rgba(201, 161, 92, 0.15);
+    --ed-accent-border: rgba(201, 161, 92, 0.5);
+
+    --ed-backstage-bg: #0b0a0c;
+    --ed-backstage-fg: #f1eff2;
+    --ed-backstage-muted: #9a96a0;
+    --ed-backstage-rule: #262429;
+
+    --ed-shadow: 0 30px 60px -25px rgba(0, 0, 0, 0.6);
+  }
+}
+
 /* Global design tokens, reset, and base typography only.
    Component styles live in a .css file next to each component. */
 :root {

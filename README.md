@@ -1,57 +1,129 @@
-# Vogue Station - Frontend
+<div align="center">
 
-Web client for **Vogue Station**, a project where a user picks a garment
-(shirts, t-shirts, and later skirts/pants), applies patterns and colors, and
-previews the result on a 3D model / mannequin. See [docs/PLAN.md](docs/PLAN.md)
-for the full product vision.
+# Vogue Station
 
-This repo is the frontend only. It is a pet project deliberately structured like
-a larger codebase (feature folders, barrel/facade exports, config-driven UI) so
-the workflow of building a real product can be practiced.
+**Design a garment in 3D — pick a model, a color, a pattern — save it, publish it, browse everyone else's.**
 
-## Stack
+[![React](https://img.shields.io/badge/React-19-149eca?logo=react&logoColor=white)](https://react.dev)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
+[![three.js](https://img.shields.io/badge/three.js-r185-000000?logo=threedotjs&logoColor=white)](https://threejs.org)
+[![Vite](https://img.shields.io/badge/Vite-8-646cff?logo=vite&logoColor=white)](https://vitejs.dev)
+[![NestJS](https://img.shields.io/badge/NestJS-11-e0234e?logo=nestjs&logoColor=white)](https://nestjs.com)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-17-4169e1?logo=postgresql&logoColor=white)](https://www.postgresql.org)
 
-- **React 19** + **TypeScript**
-- **Vite** (dev server, build) with the React Compiler enabled
-- **three.js** + **@react-three/fiber** for 3D rendering
-- **ESLint** (typescript-eslint, react-hooks, react-refresh)
+</div>
+
+<br>
+
+<img src=".github/screenshots/landing.png" alt="Vogue Station landing page" width="100%">
+
+## What this is
+
+A full-stack pet project built to practice a real product's shape, not just a
+CRUD demo: a **live 3D garment editor** (three.js) backed by a real API
+(NestJS + Postgres + S3-compatible storage), with accounts, a personal
+cabinet, user-submitted content, and an admin moderation queue gating what
+becomes public. Two repos, split like a real product would be:
+
+- **This repo** — the React frontend (editor, auth, cabinet, gallery, admin UI).
+- [**vogue-station-backend**](https://github.com/mjyt13/vogue-station-backend) — NestJS API, Prisma/Postgres, S3 storage, JWT auth, moderation.
+
+<img src=".github/screenshots/editor.png" alt="The garment editor: a 3D preview with model, color, and pattern controls" width="100%">
+
+## Features
+
+- **Live 3D customization** — swap the garment model, color, and pattern and
+  watch the preview update in place; drag to orbit, pan, auto-frame, toggle a
+  visible light source, and nudge position/rotation per axis. A live UV-unwrap
+  preview shows exactly how the pattern tiles across the mesh.
+- **Accounts** — register/login, JWT access token + rotating httpOnly refresh
+  cookie, role-based access control (user / admin).
+- **Bring your own assets** — upload a custom `.glb` garment model, a color,
+  or a pattern image; each gets validated, thumbnailed, and is immediately
+  usable by its owner.
+- **Cabinet** — every look you build is saved and can be reopened, edited,
+  and re-saved (or saved as a new copy) later.
+- **Publish + moderation** — submit a look (or a color/pattern/model) for
+  review; an admin approves or rejects it before it goes public. A look can
+  only be approved once everything it references is already public.
+- **Public gallery** — browse everyone's approved looks, filterable by color
+  or pattern.
+
+## Tech stack
+
+|            | Frontend                                                                                          | Backend                                                                                     |
+| ---------- | -------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| Core       | React 19, TypeScript, Vite (React Compiler)                                                        | NestJS 11, TypeScript                                                                            |
+| 3D         | three.js, `@react-three/fiber`, `@react-three/drei`                                                 | —                                                                                                 |
+| Data       | TanStack Query, `openapi-fetch` (typed from the backend's OpenAPI spec)                             | Prisma 7 + Postgres (via `@prisma/adapter-pg`)                                                    |
+| Forms/UI   | React Hook Form + Zod, Radix UI (Dialog/Tabs/Dropdown)                                              | class-validator / class-transformer                                                              |
+| Auth       | in-memory access token, `credentials: include` for the refresh cookie                              | `@nestjs/jwt`, argon2 password hashing                                                            |
+| Storage    | —                                                                                                    | S3-compatible object storage (MinIO locally) via `@aws-sdk/client-s3` + presigned URLs, `sharp` for thumbnails |
+| Routing    | React Router 7                                                                                       | Nest controllers, `@nestjs/throttler` rate limiting                                              |
+
+## Architecture notes
+
+- **Feature folders** under `src/features/<name>/`, each exporting through a
+  barrel `index.ts` (a facade — import `from './features/viewer'`, never a
+  file deep inside it).
+- **Config-driven UI over duplication** — e.g. the 6 position/rotation
+  sliders are generated from a `GROUPS × AXES` config with one `AxisSlider`
+  component and one handler, not six near-copies.
+- **The viewer knows nothing about the catalog.** `GarmentMaterial =
+  {color, patternUrl, patternScale}` is a pure render contract; the wardrobe
+  feature (colors/patterns/models) hands it one, the viewer just renders it.
+- **Presigned URLs are ephemeral** (~10 min) — fetched right before use,
+  never persisted, refetched on a storage 403.
 
 ## Getting started
 
-```sh
+You'll need both repos running — this one and
+[`vogue-station-backend`](https://github.com/mjyt13/vogue-station-backend).
+
+**Backend** (from the `vogue-station-backend` repo):
+
+```bash
 npm install
-npm run dev       # start the dev server (HMR)
+npm run db:up             # Postgres (docker compose; Steam Deck: db:up:deck)
+npm run minio:up:deck     # MinIO (S3-compatible storage) — or any S3-compatible store
+npm run db:migrate
+npm run db:seed           # admin user + preset colors/patterns/catalog model
+npm run storage:bootstrap # create the bucket, upload catalog assets
+npm run start:dev         # → http://localhost:3000
+```
+
+**Frontend** (this repo):
+
+```bash
+npm install
+cp .env.example .env   # VITE_API_URL, defaults to http://localhost:3000
+npm run dev            # → http://localhost:5173
 ```
 
 Other scripts:
 
-```sh
-npm run build     # type-check (tsc -b) + production build
-npm run preview   # serve the production build locally
-npm run lint      # run ESLint
+```bash
+npm run build       # tsc -b + production build
+npm run lint         # eslint
+npm run api:types    # regenerate the typed API client from docs/openapi.json
 ```
 
-Environment-specific constants belong in a `.env` file (copy `.env.example`).
-The app talks to the `vogue-station-backend` API at `VITE_API_URL`
-(default `http://localhost:3000`); see [docs/BACKEND_API.md](docs/BACKEND_API.md)
-for running the backend and the auth/data flow. Regenerate the typed API client
-after backend DTO changes with `npm run api:types`.
+Seeded dev login: `admin@vogue.dev` / `admin-password-123`.
 
-## The viewer
+## Project structure
 
-The viewer loads a `.glb` garment and lets you move and rotate it with sliders
-for the X/Y/Z position and rotation axes, over a floor grid.
-
-Because uploaded models have unknown units and origins, `Model.tsx` normalizes
-each model on load: it measures the bounding box, recenters it on the origin,
-and scales it to a consistent world size (`TARGET_SIZE`). This guarantees a model
-is framed and visible regardless of how it was exported.
-
-### Roadmap (frontend)
-
-- Orbit/pan camera controls (drag to look around) alongside the sliders
-- A visible light source and adjustable lighting
-- Pattern and color selection panel
-- Draggable/resizable viewer window
-- Toggle between garment-only and clothed-mannequin views
-- User and admin cabinets; i18n (planned post-MVP)
+```
+src/
+  app/                 app shell — layout, header/nav
+  features/
+    auth/              login/register, session, route guards
+    landing/           public marketing page
+    create/            the editor route (composes viewer + wardrobe)
+    viewer/            3D scene: model loading, transforms, UV preview
+    wardrobe/          color/pattern/model catalog, pickers, upload dialogs
+    cabinet/           a user's saved looks + patterns
+    gallery/           public browse of approved looks
+    admin/             moderation queues
+  shared/              domain-agnostic primitives (Toggle, SwatchPicker,
+                       Modal, the typed API client) and cross-feature UI
+```

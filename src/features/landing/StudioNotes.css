@@ -1,0 +1,205 @@
+.studio-notes {
+  background: var(--ed-backstage-bg);
+  color: var(--ed-backstage-fg);
+  padding-block: clamp(64px, 10vw, 120px) clamp(80px, 12vw, 140px);
+  overflow: hidden;
+}
+
+.studio-notes__inner {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding-inline: clamp(20px, 5vw, 64px);
+  position: relative;
+}
+
+.studio-notes__head {
+  max-width: 62ch;
+  margin-bottom: clamp(48px, 7vw, 88px);
+}
+
+.eyebrow {
+  font-family: var(--ed-font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ed-accent);
+  display: block;
+}
+
+.studio-notes__head h2 {
+  font-family: var(--ed-font-display);
+  font-weight: 500;
+  font-size: clamp(2rem, 3.6vw, 2.9rem);
+  margin: 14px 0 0;
+  color: var(--ed-backstage-fg);
+  text-wrap: balance;
+}
+
+.studio-notes__head p {
+  color: var(--ed-backstage-muted);
+  max-width: 52ch;
+  margin: 18px 0 0;
+  font-size: 1.02rem;
+}
+
+.studio-notes__board {
+  position: relative;
+  min-height: 920px;
+}
+
+/* Real product screenshots, clipped into a jagged "torn from a magazine"
+   silhouette (a set of hand-picked polygon() values — not meant to be exact,
+   just irregular enough to read as torn paper rather than a stamped shape). */
+.tear {
+  position: absolute;
+  margin: 0;
+  width: 320px;
+  background: #eceae6;
+  padding: 14px 14px 40px;
+  box-shadow:
+    0 22px 45px -18px rgba(0, 0, 0, 0.55),
+    0 2px 0 rgba(0, 0, 0, 0.05);
+  opacity: 0;
+  transform: translateY(28px) rotate(var(--tear-rot, 0deg));
+  transition:
+    opacity 0.7s ease,
+    transform 0.7s ease;
+  transition-delay: var(--tear-delay, 0s);
+}
+
+.tear--in-view {
+  opacity: 1;
+  transform: translateY(0) rotate(var(--tear-rot, 0deg));
+}
+
+.tear img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.tear figcaption {
+  font-family: var(--ed-font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.05em;
+  color: #4a4640;
+  margin-top: 12px;
+  text-align: left;
+}
+
+.tear__pin {
+  position: absolute;
+  top: -9px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 32% 30%, var(--ed-accent-deep), var(--ed-accent) 60%, #5c431c 100%);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.5);
+}
+
+.tear--1 {
+  --tear-rot: -6deg;
+  --tear-delay: 0s;
+  top: 0;
+  left: 2%;
+  width: 300px;
+}
+.tear--1 img {
+  clip-path: polygon(
+    0% 1.64%, 14.29% 1.7%, 28.57% 1.95%, 42.86% 1.89%, 57.14% 2.72%, 71.43% 1.72%, 85.71% 0.26%, 100% 1.7%,
+    98.06% 14.29%, 98.56% 28.57%, 98.46% 42.86%, 97.3% 57.14%, 98.66% 71.43%, 97.86% 85.71%, 97.82% 100%,
+    85.71% 99.49%, 71.43% 99.43%, 57.14% 99.12%, 42.86% 98.73%, 28.57% 98.79%, 14.29% 98.14%, 0% 99.59%,
+    1.91% 85.71%, 1.84% 71.43%, 1.34% 57.14%, 2.7% 42.86%, 2.58% 28.57%, 2.46% 14.29%
+  );
+}
+
+.tear--2 {
+  --tear-rot: 4deg;
+  --tear-delay: 0.12s;
+  top: 40px;
+  left: 27%;
+  width: 360px;
+  z-index: 2;
+}
+.tear--2 img {
+  clip-path: polygon(
+    0% 1.56%, 14.29% 1.17%, 28.57% 2.22%, 42.86% 1.74%, 57.14% 0.45%, 71.43% 1.37%, 85.71% 0.71%, 100% 1.62%,
+    97.75% 14.29%, 98.77% 28.57%, 99.35% 42.86%, 97.71% 57.14%, 98.06% 71.43%, 99.2% 85.71%, 99.49% 100%,
+    85.71% 98.7%, 71.43% 98.21%, 57.14% 98.41%, 42.86% 99.99%, 28.57% 98.78%, 14.29% 97.82%, 0% 99.87%,
+    1.54% 85.71%, 0.08% 71.43%, 0.69% 57.14%, 0.16% 42.86%, 0.48% 28.57%, 2.04% 14.29%
+  );
+}
+
+.tear--3 {
+  --tear-rot: -3deg;
+  --tear-delay: 0.24s;
+  top: 360px;
+  left: 4%;
+  width: 280px;
+}
+.tear--3 img {
+  clip-path: polygon(
+    0% 1.53%, 14.29% 0.15%, 28.57% 2.51%, 42.86% 1.75%, 57.14% 0.42%, 71.43% 2.97%, 85.71% 3.18%, 100% 2.82%,
+    99.8% 14.29%, 99.35% 28.57%, 96.73% 42.86%, 97.9% 57.14%, 98.21% 71.43%, 97.52% 85.71%, 98.48% 100%,
+    85.71% 99.81%, 71.43% 99.53%, 57.14% 99.73%, 42.86% 98.5%, 28.57% 98.18%, 14.29% 96.48%, 0% 99.79%,
+    1.04% 85.71%, 0.9% 71.43%, 0.49% 57.14%, 0.75% 42.86%, 0.78% 28.57%, 0.03% 14.29%
+  );
+}
+
+.tear--4 {
+  --tear-rot: 5deg;
+  --tear-delay: 0.36s;
+  top: 300px;
+  left: 54%;
+  width: 340px;
+}
+.tear--4 img {
+  clip-path: polygon(
+    0% 0.16%, 14.29% 0.92%, 28.57% 1.27%, 42.86% 2.12%, 57.14% 2.76%, 71.43% 0.9%, 85.71% 1.83%, 100% 1.49%,
+    98.52% 14.29%, 97.7% 28.57%, 99.68% 42.86%, 98.64% 57.14%, 98.39% 71.43%, 98.89% 85.71%, 98.39% 100%,
+    85.71% 99.76%, 71.43% 99.73%, 57.14% 98.59%, 42.86% 98%, 28.57% 97.66%, 14.29% 98.69%, 0% 99.45%,
+    0.21% 85.71%, 0.39% 71.43%, 1.7% 57.14%, 0.8% 42.86%, 0.46% 28.57%, 2.47% 14.29%
+  );
+}
+
+.tear--5 {
+  --tear-rot: -8deg;
+  --tear-delay: 0.48s;
+  top: 640px;
+  left: 33%;
+  width: 230px;
+}
+.tear--5 img {
+  clip-path: polygon(
+    0% 1.5%, 14.29% 1.95%, 28.57% 2.13%, 42.86% 0.02%, 57.14% 2.58%, 71.43% 1.49%, 85.71% 1.4%, 100% 2.71%,
+    97.62% 14.29%, 98.71% 28.57%, 97.05% 42.86%, 97.99% 57.14%, 99.48% 71.43%, 99.56% 85.71%, 98.97% 100%,
+    85.71% 99%, 71.43% 99.81%, 57.14% 97.52%, 42.86% 99.5%, 28.57% 98.49%, 14.29% 97.15%, 0% 98.38%,
+    1.48% 85.71%, 2.78% 71.43%, 0.68% 57.14%, 0.71% 42.86%, 1.38% 28.57%, 2.27% 14.29%
+  );
+}
+
+@media (max-width: 900px) {
+  .studio-notes__board {
+    min-height: 0;
+  }
+  .tear {
+    position: relative;
+    margin: 0 auto 56px;
+    top: auto !important;
+    left: auto !important;
+    transform: rotate(var(--tear-rot, 0deg));
+  }
+  .tear--in-view {
+    transform: rotate(var(--tear-rot, 0deg));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tear {
+    transition: none;
+    opacity: 1;
+    transform: rotate(var(--tear-rot, 0deg));
+  }
+}

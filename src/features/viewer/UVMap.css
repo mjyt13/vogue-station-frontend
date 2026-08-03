@@ -2,19 +2,27 @@
 .uv-map {
   margin: 0;
   flex: none;
+  border: 1px solid var(--ed-rule);
+  background: var(--ed-bg-raised);
+  padding: 18px 20px;
 }
 
 .uv-map canvas {
-  width: 240px;
-  height: 240px;
+  width: 100%;
+  max-width: 240px;
+  height: auto;
+  aspect-ratio: 1;
+  /* Fixed white backdrop, independent of theme: the 2D draw code multiplies
+     the fabric color/pattern against this base to match the 3D shader, so it
+     has to stay a true white regardless of light/dark mode. */
   background: #fff;
-  border: 1px solid var(--border);
-  border-radius: 8px;
+  border: 1px solid var(--ed-rule);
 }
 
 .uv-map figcaption {
-  margin-top: 6px;
-  font-size: 13px;
-  color: var(--text);
+  margin-top: 12px;
+  font-family: var(--ed-font-body);
+  font-size: 0.8rem;
+  color: var(--ed-muted);
   max-width: 240px;
 }

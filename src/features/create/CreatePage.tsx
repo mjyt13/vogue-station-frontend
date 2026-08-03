@@ -77,6 +77,9 @@ function Editor({ lookId, initial }: { lookId: string | null; initial?: EditorIn
   }
 
   const activeColor = colors.data.find((c) => c.id === selectedColorId) ?? colors.data[0]
+  const activePattern = selectedPatternId
+    ? patterns.data.find((p) => p.id === selectedPatternId)
+    : undefined
   const material: GarmentMaterial = {
     color: activeColor?.hex ?? '#f5f5f5',
     patternUrl: selectedPatternId ? (patternDetail.data?.patternUrl ?? null) : null,
@@ -87,6 +90,15 @@ function Editor({ lookId, initial }: { lookId: string | null; initial?: EditorIn
     <Viewer
       modelUrl={glbUrl}
       material={material}
+      caption={
+        <>
+          <span>{lookId && initial?.name ? <b>{initial.name}</b> : 'unsaved look'}</span>
+          <span>
+            {model.data?.name} · {activeColor?.name}
+            {activePattern ? ` · ${activePattern.name}` : ' · no pattern'}
+          </span>
+        </>
+      }
       controls={
         <>
           <Wardrobe

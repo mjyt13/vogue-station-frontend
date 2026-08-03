@@ -19,7 +19,10 @@ export const SwatchPicker = (props: {
     <div className="swatch-picker">
       <button type="button" className="swatch-picker__trigger" aria-haspopup="true">
         <Dot swatch={current} />
-        {props.label}: {current?.name ?? props.value}
+        <span className="swatch-picker__label">{props.label}:</span>
+        <span className="swatch-picker__value" title={current?.name ?? props.value}>
+          {current?.name ?? props.value}
+        </span>
       </button>
       <ul className="swatch-picker__menu" role="listbox" aria-label={props.label}>
         {props.options.map((opt) => (
