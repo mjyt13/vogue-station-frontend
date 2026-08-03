@@ -7,8 +7,9 @@ import { CreatePage } from './features/create'
 import { GalleryPage } from './features/gallery'
 import { LandingPage } from './features/landing'
 
-// Route map: a public landing at "/", public-only auth pages, and the editor
-// behind RequireAuth inside the app shell.
+// Route map: a public landing at "/", public-only auth pages, the editor open
+// to everyone (saving there is what prompts registration), and the rest of
+// the app shell behind RequireAuth.
 function App() {
   return (
     <Routes>
@@ -17,10 +18,10 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
       </Route>
-      <Route element={<RequireAuth />}>
-        <Route element={<AppLayout />}>
+      <Route element={<AppLayout />}>
+        <Route path="/create" element={<CreatePage />} />
+        <Route element={<RequireAuth />}>
           <Route path="/cabinet" element={<CabinetPage />} />
-          <Route path="/create" element={<CreatePage />} />
           <Route path="/gallery" element={<GalleryPage />} />
           <Route element={<RequireAdmin />}>
             <Route path="/admin" element={<AdminPage />} />

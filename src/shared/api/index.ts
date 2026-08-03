@@ -6,6 +6,7 @@ export type {
   AuthResponse,
   ColorResponse,
   CreateLookDto,
+  GarmentKind,
   GarmentMaterialDto,
   LookResponse,
   ModelDetailResponse,

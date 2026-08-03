@@ -173,7 +173,39 @@ export interface paths {
         };
         get: operations["ModelsController_list"];
         put?: never;
-        post?: never;
+        post: operations["ModelsController_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/models/{id}/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["ModelsController_confirm"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/models/{id}/publish": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["ModelsController_publish"];
         delete?: never;
         options?: never;
         head?: never;
@@ -190,7 +222,7 @@ export interface paths {
         get: operations["ModelsController_get"];
         put?: never;
         post?: never;
-        delete?: never;
+        delete: operations["ModelsController_delete"];
         options?: never;
         head?: never;
         patch?: never;
@@ -212,6 +244,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/admin/models/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: operations["AdminModelsController_moderate"];
+        trace?: never;
+    };
     "/colors": {
         parameters: {
             query?: never;
@@ -222,6 +270,22 @@ export interface paths {
         get: operations["ColorsController_list"];
         put?: never;
         post: operations["ColorsController_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/colors/{id}/publish": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["ColorsController_publish"];
         delete?: never;
         options?: never;
         head?: never;
@@ -242,6 +306,38 @@ export interface paths {
         options?: never;
         head?: never;
         patch?: never;
+        trace?: never;
+    };
+    "/admin/colors": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["AdminColorsController_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/colors/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: operations["AdminColorsController_moderate"];
         trace?: never;
     };
     "/patterns": {
@@ -499,6 +595,8 @@ export interface components {
             name: string;
             /** @enum {string} */
             kind: "TSHIRT" | "SHIRT" | "SKIRT" | "PANTS";
+            confirmed: boolean;
+            publishRequested: boolean;
             /** @enum {string} */
             status: "PENDING" | "APPROVED" | "REJECTED";
             isPublic: boolean;
@@ -507,12 +605,26 @@ export interface components {
             version: number;
             /** Format: date-time */
             createdAt: string;
+            thumbnailUrl?: string;
         };
         PaginatedModelsResponse: {
             items: components["schemas"]["ModelResponse"][];
             total: number;
             page: number;
             limit: number;
+        };
+        CreateModelDto: {
+            /** @example My Custom Tee */
+            name: string;
+            /** @enum {string} */
+            kind: "TSHIRT" | "SHIRT" | "SKIRT" | "PANTS";
+        };
+        CreateModelResponse: {
+            model: components["schemas"]["ModelResponse"];
+            /** @description Presigned PUT URL for the .glb bytes */
+            uploadUrl: string;
+            /** @description Presigned PUT URL for the client-rendered PNG thumbnail */
+            thumbnailUploadUrl: string;
         };
         ModelDetailResponse: {
             /** Format: uuid */
@@ -521,6 +633,8 @@ export interface components {
             name: string;
             /** @enum {string} */
             kind: "TSHIRT" | "SHIRT" | "SKIRT" | "PANTS";
+            confirmed: boolean;
+            publishRequested: boolean;
             /** @enum {string} */
             status: "PENDING" | "APPROVED" | "REJECTED";
             isPublic: boolean;
@@ -529,8 +643,13 @@ export interface components {
             version: number;
             /** Format: date-time */
             createdAt: string;
+            thumbnailUrl?: string;
             /** @description Short-lived presigned URL for the .glb binary */
             glbUrl: string;
+        };
+        ModerateDto: {
+            /** @enum {string} */
+            action: "approve" | "reject";
         };
         ColorResponse: {
             /** Format: uuid */
@@ -541,6 +660,9 @@ export interface components {
             hex: string;
             /** @description null = global preset */
             ownerId: Record<string, never> | null;
+            publishRequested: boolean;
+            /** @enum {string} */
+            status: "PENDING" | "APPROVED" | "REJECTED";
             isPublic: boolean;
             /** Format: date-time */
             createdAt: string;
@@ -621,10 +743,6 @@ export interface components {
             thumbnailUrl?: string;
             /** @description Short-lived presigned URL of the full-size image — the GarmentMaterial.patternUrl value */
             patternUrl: string;
-        };
-        ModerateDto: {
-            /** @enum {string} */
-            action: "approve" | "reject";
         };
         GarmentMaterialDto: {
             /** @example #9d2235 */
@@ -979,6 +1097,71 @@ export interface operations {
             };
         };
     };
+    ModelsController_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateModelDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CreateModelResponse"];
+                };
+            };
+        };
+    };
+    ModelsController_confirm: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ModelResponse"];
+                };
+            };
+        };
+    };
+    ModelsController_publish: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ModelResponse"];
+                };
+            };
+        };
+    };
     ModelsController_get: {
         parameters: {
             query?: never;
@@ -1000,6 +1183,25 @@ export interface operations {
             };
         };
     };
+    ModelsController_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     AdminModelsController_list: {
         parameters: {
             query?: {
@@ -1008,6 +1210,7 @@ export interface operations {
                 /** @description Only items owned by the caller (cabinet view) */
                 mine?: boolean;
                 status?: "PENDING" | "APPROVED" | "REJECTED";
+                requested?: boolean;
             };
             header?: never;
             path?: never;
@@ -1021,6 +1224,31 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PaginatedModelsResponse"];
+                };
+            };
+        };
+    };
+    AdminModelsController_moderate: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ModerateDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ModelResponse"];
                 };
             };
         };
@@ -1072,6 +1300,27 @@ export interface operations {
             };
         };
     };
+    ColorsController_publish: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ColorResponse"];
+                };
+            };
+        };
+    };
     ColorsController_delete: {
         parameters: {
             query?: never;
@@ -1088,6 +1337,57 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    AdminColorsController_list: {
+        parameters: {
+            query?: {
+                page?: number;
+                limit?: number;
+                /** @description Only items owned by the caller (cabinet view) */
+                mine?: boolean;
+                status?: "PENDING" | "APPROVED" | "REJECTED";
+                requested?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedColorsResponse"];
+                };
+            };
+        };
+    };
+    AdminColorsController_moderate: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ModerateDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ColorResponse"];
+                };
             };
         };
     };

@@ -3,7 +3,8 @@ import { api } from '../../shared/api'
 
 type Action = 'approve' | 'reject'
 
-// Moderation queues: patterns that requested publish, and pending looks.
+// Moderation queues: patterns/models/colors that requested publish, and
+// pending looks.
 export function usePendingPatterns() {
   return useQuery({
     queryKey: ['admin', 'patterns', 'pending'],
@@ -12,6 +13,32 @@ export function usePendingPatterns() {
         params: { query: { requested: true, status: 'PENDING' } },
       })
       if (error || !data) throw error ?? new Error('Failed to load pending patterns')
+      return data.items
+    },
+  })
+}
+
+export function usePendingModels() {
+  return useQuery({
+    queryKey: ['admin', 'models', 'pending'],
+    queryFn: async () => {
+      const { data, error } = await api.GET('/admin/models', {
+        params: { query: { requested: true, status: 'PENDING' } },
+      })
+      if (error || !data) throw error ?? new Error('Failed to load pending models')
+      return data.items
+    },
+  })
+}
+
+export function usePendingColors() {
+  return useQuery({
+    queryKey: ['admin', 'colors', 'pending'],
+    queryFn: async () => {
+      const { data, error } = await api.GET('/admin/colors', {
+        params: { query: { requested: true, status: 'PENDING' } },
+      })
+      if (error || !data) throw error ?? new Error('Failed to load pending colors')
       return data.items
     },
   })
@@ -39,6 +66,20 @@ async function moderatePatternReq(id: string, action: Action) {
   })
   if (error) throw error
 }
+async function moderateModelReq(id: string, action: Action) {
+  const { error } = await api.PATCH('/admin/models/{id}', {
+    params: { path: { id } },
+    body: { action },
+  })
+  if (error) throw error
+}
+async function moderateColorReq(id: string, action: Action) {
+  const { error } = await api.PATCH('/admin/colors/{id}', {
+    params: { path: { id } },
+    body: { action },
+  })
+  if (error) throw error
+}
 async function moderateLookReq(id: string, action: Action) {
   const { error } = await api.PATCH('/admin/looks/{id}', {
     params: { path: { id } },
@@ -54,6 +95,28 @@ export function useModeratePattern() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin'] })
       queryClient.invalidateQueries({ queryKey: ['patterns'] })
+    },
+  })
+}
+
+export function useModerateModel() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, action }: { id: string; action: Action }) => moderateModelReq(id, action),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin'] })
+      queryClient.invalidateQueries({ queryKey: ['models'] })
+    },
+  })
+}
+
+export function useModerateColor() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, action }: { id: string; action: Action }) => moderateColorReq(id, action),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin'] })
+      queryClient.invalidateQueries({ queryKey: ['colors'] })
     },
   })
 }

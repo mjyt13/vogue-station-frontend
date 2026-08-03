@@ -8,18 +8,23 @@ export function Modal({
   open,
   onOpenChange,
   title,
+  size = 'default',
   children,
 }: {
   open: boolean
   onOpenChange: (open: boolean) => void
   title: string
+  size?: 'default' | 'wide'
   children: ReactNode
 }) {
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
         <Dialog.Overlay className="dialog-overlay" />
-        <Dialog.Content className="dialog-content" aria-describedby={undefined}>
+        <Dialog.Content
+          className={`dialog-content${size === 'wide' ? ' dialog-content--wide' : ''}`}
+          aria-describedby={undefined}
+        >
           <Dialog.Title className="dialog-title">{title}</Dialog.Title>
           {children}
         </Dialog.Content>

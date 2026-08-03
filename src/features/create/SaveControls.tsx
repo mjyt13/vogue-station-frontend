@@ -3,12 +3,15 @@ import { useNavigate } from 'react-router-dom'
 import { getApiErrorMessage } from '../../shared/api'
 import type { CreateLookDto } from '../../shared/api'
 import { Modal } from '../../shared/Modal'
+import { useAuth } from '../auth'
 import { useSaveLook, useUpdateLook } from './api'
 
 // Save controls for the editor:
 //  - editing an existing look → "Save" (update in place) + "Save as…" (new copy)
 //  - a fresh look             → "Save look" (create)
 // Creating always navigates to ?look=<newId> so further saves update it.
+// The editor itself is open to anonymous visitors, so any save attempt while
+// signed out sends them to registration instead of hitting the API.
 export function SaveControls({
   lookId,
   lookName,
@@ -19,6 +22,8 @@ export function SaveControls({
   payload: Omit<CreateLookDto, 'name'>
 }) {
   const navigate = useNavigate()
+  const { status } = useAuth()
+  const authed = status === 'authenticated'
   const save = useSaveLook()
   const update = useUpdateLook()
   const [open, setOpen] = useState(false)
@@ -38,7 +43,15 @@ export function SaveControls({
   }
 
   const saveInPlace = () => {
+    if (!authed) return navigate('/register')
     if (lookId) update.mutate({ id: lookId, body: { ...payload, name: lookName ?? 'Untitled' } })
+  }
+
+  const openSaveDialog = () => {
+    if (!authed) return navigate('/register')
+    setName('')
+    setError(null)
+    setOpen(true)
   }
 
   return (
@@ -62,11 +75,7 @@ export function SaveControls({
         <button
           type="button"
           className={lookId ? 'save-controls__secondary' : 'save-controls__primary'}
-          onClick={() => {
-            setName('')
-            setError(null)
-            setOpen(true)
-          }}
+          onClick={openSaveDialog}
         >
           {lookId ? 'Save as…' : 'Save look'}
         </button>

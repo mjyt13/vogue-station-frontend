@@ -1,5 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '../../shared/api'
+import type { GarmentKind } from '../../shared/api'
+import { captureModelThumbnail } from './captureModelThumbnail'
 
 // The catalog the user can dress a garment in: their own items + global presets
 // + approved public ones (the backend decides which). Swatches use the list's
@@ -92,5 +94,64 @@ export function useUploadPattern() {
     },
     onError: (error) => debugUpload('error', error),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['patterns'] }),
+  })
+}
+
+async function createModelRecord(name: string, kind: GarmentKind) {
+  const { data, error } = await api.POST('/models', { body: { name, kind } })
+  if (error || !data) throw error ?? new Error('Failed to create model')
+  return data
+}
+
+async function confirmModel(id: string) {
+  const { error } = await api.POST('/models/{id}/confirm', { params: { path: { id } } })
+  if (error) throw error
+}
+
+// 4-step upload: create the record (→ two presigned PUT URLs), upload the .glb
+// bytes, render + upload a client-side thumbnail (see captureModelThumbnail),
+// then confirm (server validates both and normalizes the thumbnail).
+export function useUploadModel() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({
+      name,
+      kind,
+      file,
+    }: {
+      name: string
+      kind: GarmentKind
+      file: File
+    }) => {
+      debugUpload('1/4 create record', { name, kind, size: file.size })
+      const created = await createModelRecord(name, kind)
+      debugUpload('created', created.model.id)
+
+      // No auth header — the presigned URL is the credential.
+      debugUpload('2/4 PUT .glb → storage')
+      const put = await fetch(created.uploadUrl, {
+        method: 'PUT',
+        body: file,
+        headers: { 'Content-Type': 'model/gltf-binary' },
+      })
+      debugUpload('PUT status', put.status, put.ok ? 'ok' : 'FAILED')
+      if (!put.ok) throw new Error('Upload failed')
+
+      debugUpload('3/4 render + PUT thumbnail → storage')
+      const thumbnail = await captureModelThumbnail(file)
+      const putThumb = await fetch(created.thumbnailUploadUrl, {
+        method: 'PUT',
+        body: thumbnail,
+        headers: { 'Content-Type': 'image/png' },
+      })
+      if (!putThumb.ok) throw new Error('Thumbnail upload failed')
+
+      debugUpload('4/4 confirm')
+      await confirmModel(created.model.id)
+      debugUpload('done', created.model.id)
+      return created.model
+    },
+    onError: (error) => debugUpload('error', error),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['models'] }),
   })
 }

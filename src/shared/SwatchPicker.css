@@ -45,6 +45,17 @@
     #fff;
 }
 
+/* Invisible bridge over the gap between trigger and menu, so moving the
+   pointer straight down doesn't cross a dead zone and drop :hover. */
+.swatch-picker::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  height: 4px;
+}
+
 .swatch-picker__menu {
   position: absolute;
   z-index: 10;
@@ -53,18 +64,30 @@
   margin: 0;
   padding: 4px;
   list-style: none;
-  display: none;
+  display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 2px;
   background: var(--bg);
   border: 1px solid var(--border);
   border-radius: 8px;
   box-shadow: var(--shadow);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(-4px);
+  transition:
+    opacity 0.15s ease,
+    transform 0.15s ease,
+    visibility 0s linear 0.15s;
 }
 
 .swatch-picker:hover .swatch-picker__menu,
 .swatch-picker:focus-within .swatch-picker__menu {
-  display: grid;
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateY(0);
+  transition-delay: 0s;
 }
 
 .swatch-picker__option {

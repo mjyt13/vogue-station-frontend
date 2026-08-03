@@ -3,10 +3,10 @@ import previewUrl from '../../assets/preview.png'
 import { useAuth } from '../auth'
 import './landing.css'
 
-// Public entry point. Shows a preview of the editor and routes visitors into
-// auth (or straight to the editor if already signed in).
+// Public entry point. Shows a preview of the editor and sends visitors
+// straight into it — signing up only comes up when they try to save.
 export function LandingPage() {
-  const { status } = useAuth()
+  const { status, logout } = useAuth()
   const authed = status === 'authenticated'
 
   return (
@@ -15,15 +15,20 @@ export function LandingPage() {
         <span className="landing-brand">Vogue Station</span>
         <nav className="landing-actions">
           {authed ? (
-            <Link className="btn btn--primary" to="/create">
-              Open editor
-            </Link>
+            <>
+              <Link className="btn btn--primary" to="/create">
+                Open editor
+              </Link>
+              <button type="button" className="btn" onClick={() => logout()}>
+                Log out
+              </button>
+            </>
           ) : (
             <>
               <Link className="btn" to="/login">
                 Log in
               </Link>
-              <Link className="btn btn--primary" to="/register">
+              <Link className="btn btn--primary" to="/create">
                 Get started
               </Link>
             </>
@@ -38,7 +43,7 @@ export function LandingPage() {
             Pick colors and patterns and preview them live on a 3D model. Save your looks and come
             back to refine them anytime.
           </p>
-          <Link className="btn btn--primary btn--lg" to={authed ? '/create' : '/register'}>
+          <Link className="btn btn--primary btn--lg" to="/create">
             {authed ? 'Open editor' : 'Start creating'}
           </Link>
         </div>

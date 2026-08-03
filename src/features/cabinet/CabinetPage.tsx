@@ -8,9 +8,13 @@ import { StatusBadge } from '../../shared/StatusBadge'
 import {
   useDeleteLook,
   useDeletePattern,
+  useMyColors,
   useMyLooks,
+  useMyModels,
   useMyPatterns,
+  usePublishColor,
   usePublishLook,
+  usePublishModel,
   usePublishPattern,
 } from './api'
 import './cabinet.css'
@@ -45,20 +49,27 @@ function canRequestPublish(item: { isPublic: boolean; publishRequested: boolean;
   return !item.isPublic && !(item.publishRequested && item.status === 'PENDING')
 }
 
-// A look publish held back by its pattern; drives the explainer modal.
-type BlockedPublish = {
-  lookId: string
-  patternId: string
-  patternName: string
-  patternInReview: boolean
+// One private dependency (pattern/color/model) blocking a look's publish.
+type PublishDep = {
+  kind: 'pattern' | 'color' | 'model'
+  id: string
+  name: string
+  thumbnailUrl?: string | null
+  hex?: string | null
+  inReview: boolean
 }
+type BlockedPublish = { lookId: string; deps: PublishDep[] }
 
 function LooksTab() {
   const looks = useMyLooks()
   const myPatterns = useMyPatterns()
+  const myColors = useMyColors()
+  const myModels = useMyModels()
   const del = useDeleteLook()
   const publish = usePublishLook()
   const publishPattern = usePublishPattern()
+  const publishColor = usePublishColor()
+  const publishModel = usePublishModel()
   const [error, setError] = useState<string | null>(null)
   const [blocked, setBlocked] = useState<BlockedPublish | null>(null)
 
@@ -68,29 +79,71 @@ function LooksTab() {
     })
   }
 
-  // The gallery only accepts looks whose pattern is already public, so warn
+  // The gallery only accepts looks whose assets are already public, so warn
   // the owner up front instead of letting the admin's approve fail later.
-  const onPublishClick = (look: { id: string; patternId?: unknown }) => {
+  const onPublishClick = (look: { id: string; patternId?: unknown; colorId?: unknown; garmentModelId: string }) => {
+    const deps: PublishDep[] = []
+
+    // A dependency blocks the look as long as it isn't public yet — even if
+    // it's already `publishRequested` and sitting in PENDING review (that's
+    // the `inReview` display flag below, not a reason to leave it out: the
+    // look still can't be *approved* until the dependency is actually public).
     const patternId = look.patternId as unknown as string | null
     const pattern = patternId ? myPatterns.data?.find((p) => p.id === patternId) : undefined
     if (pattern && !pattern.isPublic) {
-      setBlocked({
-        lookId: look.id,
-        patternId: pattern.id,
-        patternName: pattern.name,
-        patternInReview: pattern.publishRequested && pattern.status === 'PENDING',
+      deps.push({
+        kind: 'pattern',
+        id: pattern.id,
+        name: pattern.name,
+        thumbnailUrl: pattern.thumbnailUrl,
+        inReview: pattern.publishRequested && pattern.status === 'PENDING',
       })
+    }
+
+    const colorId = look.colorId as unknown as string | null
+    const color = colorId ? myColors.data?.find((c) => c.id === colorId) : undefined
+    if (color && !color.isPublic) {
+      deps.push({
+        kind: 'color',
+        id: color.id,
+        name: color.name,
+        hex: color.hex,
+        inReview: color.publishRequested && color.status === 'PENDING',
+      })
+    }
+
+    const model = myModels.data?.find((m) => m.id === look.garmentModelId)
+    if (model && !model.isPublic) {
+      deps.push({
+        kind: 'model',
+        id: model.id,
+        name: model.name,
+        thumbnailUrl: model.thumbnailUrl,
+        inReview: model.publishRequested && model.status === 'PENDING',
+      })
+    }
+
+    if (deps.length === 0) {
+      publishLook(look.id)
       return
     }
-    publishLook(look.id)
+    setBlocked({ lookId: look.id, deps })
   }
 
-  const publishBoth = async () => {
+  const publishAll = async () => {
     if (!blocked) return
-    const { lookId, patternId } = blocked
+    const { lookId, deps } = blocked
     setBlocked(null)
     try {
-      await publishPattern.mutateAsync(patternId)
+      await Promise.all(
+        deps
+          .filter((d) => !d.inReview)
+          .map((d) => {
+            if (d.kind === 'pattern') return publishPattern.mutateAsync(d.id)
+            if (d.kind === 'color') return publishColor.mutateAsync(d.id)
+            return publishModel.mutateAsync(d.id)
+          }),
+      )
       await publish.mutateAsync(lookId)
     } catch (e) {
       setError(getApiErrorMessage(e, 'Could not publish'))
@@ -136,7 +189,12 @@ function LooksTab() {
                   <button
                     type="button"
                     className="cab-btn"
-                    disabled={publish.isPending || publishPattern.isPending}
+                    disabled={
+                      publish.isPending ||
+                      publishPattern.isPending ||
+                      publishColor.isPending ||
+                      publishModel.isPending
+                    }
                     onClick={() => onPublishClick(look)}
                   >
                     Publish
@@ -162,43 +220,36 @@ function LooksTab() {
         onOpenChange={(open) => {
           if (!open) setBlocked(null)
         }}
-        title="The pattern isn’t public yet"
+        title="Publish these first"
+        size="wide"
       >
         <p className="dialog-desc">
-          {blocked?.patternInReview ? (
-            <>
-              This look uses your pattern “{blocked?.patternName}”, which is still in review. The
-              look can only be approved after the pattern goes public — you can still submit it
-              now and it will wait in the queue.
-            </>
-          ) : (
-            <>
-              This look uses your private pattern “{blocked?.patternName}”. Gallery looks may only
-              use public patterns, so the pattern has to be published (and approved) first.
-            </>
-          )}
+          This look uses private items — publish them so the gallery can show it once it’s
+          approved:
         </p>
+        <ul className="dep-list">
+          {blocked?.deps.map((dep) => (
+            <li key={`${dep.kind}-${dep.id}`} className="dep-list__item">
+              <span className="dep-list__swatch" style={dep.hex ? { background: dep.hex } : undefined}>
+                {dep.thumbnailUrl && (
+                  <img src={dep.thumbnailUrl} alt="" crossOrigin="anonymous" />
+                )}
+              </span>
+              <div className="dep-list__body">
+                <span className="dep-list__name">{dep.name}</span>
+                <span className="dep-list__kind">{dep.kind}</span>
+                {dep.inReview && <StatusBadge item={{ isPublic: false, publishRequested: true, status: 'PENDING' }} />}
+              </div>
+            </li>
+          ))}
+        </ul>
         <div className="dialog-actions">
           <button type="button" className="dialog-btn" onClick={() => setBlocked(null)}>
             Cancel
           </button>
-          {blocked?.patternInReview ? (
-            <button
-              type="button"
-              className="dialog-btn dialog-btn--primary"
-              onClick={() => {
-                const lookId = blocked.lookId
-                setBlocked(null)
-                publishLook(lookId)
-              }}
-            >
-              Publish anyway
-            </button>
-          ) : (
-            <button type="button" className="dialog-btn dialog-btn--primary" onClick={publishBoth}>
-              Publish both
-            </button>
-          )}
+          <button type="button" className="dialog-btn dialog-btn--primary" onClick={publishAll}>
+            Publish all
+          </button>
         </div>
       </Modal>
       <ErrorDialog title="Publishing failed" message={error} onClose={() => setError(null)} />

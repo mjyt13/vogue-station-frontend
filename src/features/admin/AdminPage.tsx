@@ -3,9 +3,13 @@ import { useState } from 'react'
 import { getApiErrorMessage } from '../../shared/api'
 import { ErrorDialog } from '../../shared/ErrorDialog'
 import {
+  useModerateColor,
   useModerateLook,
+  useModerateModel,
   useModeratePattern,
+  usePendingColors,
   usePendingLooks,
+  usePendingModels,
   usePendingPatterns,
 } from './api'
 import './admin.css'
@@ -19,12 +23,24 @@ export function AdminPage() {
           <Tabs.Trigger className="admin-tab" value="patterns">
             Patterns
           </Tabs.Trigger>
+          <Tabs.Trigger className="admin-tab" value="models">
+            Models
+          </Tabs.Trigger>
+          <Tabs.Trigger className="admin-tab" value="colors">
+            Colors
+          </Tabs.Trigger>
           <Tabs.Trigger className="admin-tab" value="looks">
             Looks
           </Tabs.Trigger>
         </Tabs.List>
         <Tabs.Content value="patterns">
           <PatternQueue />
+        </Tabs.Content>
+        <Tabs.Content value="models">
+          <ModelQueue />
+        </Tabs.Content>
+        <Tabs.Content value="colors">
+          <ColorQueue />
         </Tabs.Content>
         <Tabs.Content value="looks">
           <LookQueue />
@@ -58,6 +74,61 @@ function PatternQueue() {
             </li>
           )
         })}
+      </ul>
+      <ErrorDialog title="Moderation failed" message={error} onClose={() => setError(null)} />
+    </>
+  )
+}
+
+function ModelQueue() {
+  const pending = usePendingModels()
+  const moderate = useModerateModel()
+  const [error, setError] = useState<string | null>(null)
+
+  if (pending.isLoading) return <p className="admin-status">Loading…</p>
+  if (pending.isError) return <p className="admin-status admin-status--error">Couldn’t load the queue.</p>
+  if (pending.data?.length === 0) return <p className="admin-status">Nothing to review. 🎉</p>
+
+  return (
+    <>
+      <ul className="admin-grid">
+        {pending.data?.map((model) => {
+          const thumbnailUrl = model.thumbnailUrl as unknown as string | null
+          return (
+            <li key={model.id} className="mod-card">
+              <span className="mod-card__swatch">
+                {thumbnailUrl && <img src={thumbnailUrl} alt="" crossOrigin="anonymous" />}
+              </span>
+              <span className="mod-card__name">{model.name}</span>
+              <ModActions id={model.id} mutation={moderate} onError={setError} />
+            </li>
+          )
+        })}
+      </ul>
+      <ErrorDialog title="Moderation failed" message={error} onClose={() => setError(null)} />
+    </>
+  )
+}
+
+function ColorQueue() {
+  const pending = usePendingColors()
+  const moderate = useModerateColor()
+  const [error, setError] = useState<string | null>(null)
+
+  if (pending.isLoading) return <p className="admin-status">Loading…</p>
+  if (pending.isError) return <p className="admin-status admin-status--error">Couldn’t load the queue.</p>
+  if (pending.data?.length === 0) return <p className="admin-status">Nothing to review. 🎉</p>
+
+  return (
+    <>
+      <ul className="admin-grid">
+        {pending.data?.map((color) => (
+          <li key={color.id} className="mod-card">
+            <span className="mod-card__swatch" style={{ background: color.hex }} />
+            <span className="mod-card__name">{color.name}</span>
+            <ModActions id={color.id} mutation={moderate} onError={setError} />
+          </li>
+        ))}
       </ul>
       <ErrorDialog title="Moderation failed" message={error} onClose={() => setError(null)} />
     </>

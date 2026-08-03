@@ -21,6 +21,10 @@
   box-shadow: var(--shadow);
 }
 
+.dialog-content--wide {
+  width: min(92vw, 460px);
+}
+
 .dialog-title {
   margin: 0;
   font-family: var(--heading);

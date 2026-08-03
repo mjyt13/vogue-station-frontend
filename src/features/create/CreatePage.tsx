@@ -51,7 +51,9 @@ function Editor({ lookId, initial }: { lookId: string | null; initial?: EditorIn
   const colors = useColors()
   const patterns = usePatterns()
   const models = useModels()
-  const modelId = initial?.modelId ?? models.data?.[0]?.id
+
+  const [selectedModelId, setSelectedModelId] = useState<string | null>(initial?.modelId ?? null)
+  const modelId = selectedModelId ?? models.data?.[0]?.id
   const model = useModel(modelId)
 
   const [selectedColorId, setSelectedColorId] = useState<string | null>(initial?.colorId ?? null)
@@ -94,11 +96,18 @@ function Editor({ lookId, initial }: { lookId: string | null; initial?: EditorIn
               name: p.name,
               thumbnailUrl: p.thumbnailUrl,
             }))}
+            models={(models.data ?? []).map((m) => ({
+              id: m.id,
+              name: m.name,
+              thumbnailUrl: m.thumbnailUrl,
+            }))}
             selectedColorId={activeColor?.id ?? null}
             selectedPatternId={selectedPatternId}
+            selectedModelId={modelId ?? null}
             patternScale={patternScale}
             onColor={(c) => setSelectedColorId(c.id)}
             onPattern={setSelectedPatternId}
+            onModel={setSelectedModelId}
             onScale={setPatternScale}
           />
           <SaveControls
