@@ -12,8 +12,12 @@ export function LoginPage() {
   const { login } = useAuth()
   const navigate = useNavigate()
   return (
-    <>
-      <button onClick={() => navigate('/')}>Back</button>
+    <div className="auth-page">
+      <div className="auth-top">
+        <button type="button" className="auth-back" onClick={() => navigate('/')}>
+          Back
+        </button>
+      </div>
       <AuthForm
         title="Log in"
         schema={schema}
@@ -34,6 +38,6 @@ export function LoginPage() {
           </p>
         }
       />
-    </>
+    </div>
   )
 }

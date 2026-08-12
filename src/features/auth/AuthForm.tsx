@@ -48,7 +48,7 @@ export function AuthForm({
   })
 
   return (
-    <div className="auth-page">
+    <div className="auth-content">
       <form className="auth-card" onSubmit={submit} noValidate>
         <h2>{title}</h2>
         {formError && (

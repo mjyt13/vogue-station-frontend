@@ -19,8 +19,12 @@ export function RegisterPage() {
   const { register } = useAuth()
   const navigate = useNavigate()
   return (
-    <>
-      <button onClick={() => navigate('/')}>Back</button>
+    <div className="auth-page">
+      <div className="auth-top">
+        <button type="button" className="auth-back" onClick={() => navigate('/')}>
+          Back
+        </button>
+      </div>
       <AuthForm
         title="Create account"
         schema={schema}
@@ -42,6 +46,6 @@ export function RegisterPage() {
           </p>
         }
       />
-  </>
+    </div>
   )
 }
