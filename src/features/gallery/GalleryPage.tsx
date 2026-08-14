@@ -1,11 +1,13 @@
+import { useNavigate } from 'react-router-dom'
 import { useGallery } from './api'
 import './gallery.css'
 
-// Public gallery of approved looks. View-only: other people's looks can't be
-// opened in the editor (the backend 404s non-owners), so cards just preview
-// the material.
+// Public gallery of approved looks. Cards preview the material and link to a
+// read-only 3D viewer; the editor itself stays owner-only (the backend 404s
+// non-owners there).
 export function GalleryPage() {
   const gallery = useGallery()
+  const navigate = useNavigate()
 
   return (
     <div className="gallery">
@@ -19,18 +21,37 @@ export function GalleryPage() {
       )}
       <ul className="gallery-grid">
         {gallery.data?.map((look) => {
+          const thumbnailUrl = look.thumbnailUrl as unknown as string | null
           const patternUrl = look.material.patternUrl as unknown as string | null
           return (
             <li key={look.id} className="gallery-card">
-              <span className="gallery-card__swatch" style={{ background: look.material.color }}>
-                {patternUrl && (
+              <span
+                className="gallery-card__swatch"
+                style={thumbnailUrl ? undefined : { background: look.material.color }}
+              >
+                {thumbnailUrl ? (
                   <img
-                    src={patternUrl}
+                    src={thumbnailUrl}
                     alt=""
-                    crossOrigin="anonymous"
+                    className="gallery-card__preview"
                     onError={(e) => (e.currentTarget.style.display = 'none')}
                   />
+                ) : (
+                  patternUrl && (
+                    <img
+                      src={patternUrl}
+                      alt=""
+                      className="gallery-card__pattern-img"
+                      crossOrigin="anonymous"
+                      onError={(e) => (e.currentTarget.style.display = 'none')}
+                    />
+                  )
                 )}
+                <div className="gallery-card__hover">
+                  <button type="button" onClick={() => navigate(`/gallery/${look.id}`)}>
+                    View in 3D
+                  </button>
+                </div>
               </span>
               <span className="gallery-card__name">{look.name}</span>
             </li>

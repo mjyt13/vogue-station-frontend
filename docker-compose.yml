@@ -1,0 +1,20 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        # Baked into the JS bundle at build time (see Dockerfile) — this must
+        # be a URL the *browser* can reach, not a container DNS name like
+        # http://backend:3000, since fetches happen client-side.
+        VITE_API_URL: ${VITE_API_URL:-http://localhost:3000}
+    restart: unless-stopped
+    ports:
+      # Loopback only — Caddy/nginx on the host terminates TLS and forwards
+      # here. See the backend compose file for the same reasoning.
+      - '127.0.0.1:5173:8080'
+
+# Points at vogue-station-backend running separately (its own docker-compose,
+# or `npm run start:dev`) on localhost:3000 by default. Its CORS_ORIGIN must
+# match wherever this container is actually published from — update the
+# backend's .env if you republish on a different host port than 5173.

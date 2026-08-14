@@ -3,4 +3,5 @@
 export { Viewer } from './Viewer'
 export { Model } from './Model'
 export { INITIAL_TRANSFORM } from './config'
+export type { CaptureFn } from './CapturePreview'
 export type { Axis, GarmentMaterial, Kind, Transform, Vec3 } from './types'

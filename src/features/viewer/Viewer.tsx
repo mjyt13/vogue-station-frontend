@@ -1,9 +1,11 @@
 import { Bounds, Grid, OrbitControls } from '@react-three/drei'
 import { Canvas } from '@react-three/fiber'
 import { Suspense, useState } from 'react'
-import type { ReactNode } from 'react'
+import type { MutableRefObject, ReactNode } from 'react'
 import { ErrorBoundary } from '../../shared/ErrorBoundary'
 import { Toggle } from '../../shared/Toggle'
+import { CapturePreview } from './CapturePreview'
+import type { CaptureFn } from './CapturePreview'
 import { INITIAL_TRANSFORM } from './config'
 import { Model } from './Model'
 import { TransformPanel } from './TransformPanel'
@@ -38,11 +40,15 @@ export function Viewer({
   material,
   controls,
   caption,
+  previewRef,
 }: {
   modelUrl: string
   material: GarmentMaterial
   controls?: ReactNode
   caption?: ReactNode
+  // When given, a CapturePreview mounts inside the Canvas and keeps this ref
+  // set to a function that snapshots whatever's currently rendered.
+  previewRef?: MutableRefObject<CaptureFn | null>
 }) {
   const [transform, setTransform] = useState<Transform>(INITIAL_TRANSFORM)
   const [scene, setScene] = useState<SceneOptions>(INITIAL_SCENE)
@@ -86,7 +92,11 @@ export function Viewer({
               </div>
             )}
           >
-            <Canvas camera={{ position: [0, 1, 5], fov: 50 }}>
+            <Canvas
+              camera={{ position: [0, 1, 5], fov: 50 }}
+              gl={{ preserveDrawingBuffer: true }}
+            >
+            {previewRef && <CapturePreview captureRef={previewRef} />}
             <color attach="background" args={['#2b2f3a']} />
             <ambientLight intensity={0.6} />
             <directionalLight position={LIGHT_POS} intensity={1.2} />

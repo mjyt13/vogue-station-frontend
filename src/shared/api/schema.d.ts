@@ -500,6 +500,38 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/looks/{id}/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["LooksController_requestPreviewUpload"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/looks/{id}/preview/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["LooksController_confirmPreview"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/admin/looks": {
         parameters: {
             query?: never;
@@ -770,6 +802,8 @@ export interface components {
             /** @enum {string} */
             status: "PENDING" | "APPROVED" | "REJECTED";
             isPublic: boolean;
+            /** @description Short-lived presigned URL of the client-rendered static preview, or null until one is confirmed */
+            thumbnailUrl?: Record<string, never> | null;
             /** Format: date-time */
             createdAt: string;
             /** Format: date-time */
@@ -820,6 +854,10 @@ export interface components {
             patternId?: string;
             /** @default 1 */
             patternScale: number;
+        };
+        LookPreviewUploadResponse: {
+            /** @description Presigned PUT URL: upload the client-rendered PNG preview here, then call /looks/{id}/preview/confirm */
+            uploadUrl: string;
         };
     };
     responses: never;
@@ -1730,6 +1768,48 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    LooksController_requestPreviewUpload: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LookPreviewUploadResponse"];
+                };
+            };
+        };
+    };
+    LooksController_confirmPreview: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LookResponse"];
+                };
             };
         };
     };

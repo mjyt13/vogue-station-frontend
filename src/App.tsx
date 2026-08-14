@@ -4,7 +4,7 @@ import { AdminPage } from './features/admin'
 import { LoginPage, PublicOnly, RegisterPage, RequireAdmin, RequireAuth } from './features/auth'
 import { CabinetPage } from './features/cabinet'
 import { CreatePage } from './features/create'
-import { GalleryPage } from './features/gallery'
+import { GalleryLookPage, GalleryPage } from './features/gallery'
 import { LandingPage } from './features/landing'
 
 // Route map: a public landing at "/", public-only auth pages, the editor open
@@ -23,6 +23,7 @@ function App() {
         <Route element={<RequireAuth />}>
           <Route path="/cabinet" element={<CabinetPage />} />
           <Route path="/gallery" element={<GalleryPage />} />
+          <Route path="/gallery/:lookId" element={<GalleryLookPage />} />
           <Route element={<RequireAdmin />}>
             <Route path="/admin" element={<AdminPage />} />
           </Route>

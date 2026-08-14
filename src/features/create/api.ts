@@ -70,6 +70,43 @@ export function useSaveLook() {
   })
 }
 
+async function requestLookPreviewUpload(id: string) {
+  const { data, error } = await api.POST('/looks/{id}/preview', { params: { path: { id } } })
+  if (error || !data) throw error ?? new Error('Failed to prepare the preview upload')
+  return data
+}
+
+async function confirmLookPreview(id: string) {
+  const { data, error } = await api.POST('/looks/{id}/preview/confirm', {
+    params: { path: { id } },
+  })
+  if (error || !data) throw error ?? new Error('Failed to confirm the preview')
+  return data
+}
+
+// Direct-to-storage upload of a client-rendered PNG snapshot (see
+// features/viewer/CapturePreview.tsx), same 3-step shape as pattern/model
+// uploads: presign → PUT the bytes → confirm.
+export function useUploadLookPreview() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ id, blob }: { id: string; blob: Blob }) => {
+      const { uploadUrl } = await requestLookPreviewUpload(id)
+      const put = await fetch(uploadUrl, {
+        method: 'PUT',
+        body: blob,
+        headers: { 'Content-Type': 'image/png' },
+      })
+      if (!put.ok) throw new Error('Preview upload failed')
+      return confirmLookPreview(id)
+    },
+    onSuccess: (_data, { id }) => {
+      queryClient.invalidateQueries({ queryKey: ['looks'] })
+      queryClient.invalidateQueries({ queryKey: ['look', id] })
+    },
+  })
+}
+
 // Update an existing look in place (PUT). UpdateLookDto is the same fields, all
 // optional, so a full CreateLookDto payload is a valid update body.
 export function useUpdateLook() {

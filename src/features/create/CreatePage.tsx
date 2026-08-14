@@ -1,7 +1,7 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { Viewer } from '../viewer'
-import type { GarmentMaterial } from '../viewer'
+import type { CaptureFn, GarmentMaterial } from '../viewer'
 import { PATTERN_SCALE, useColors, usePatterns, Wardrobe } from '../wardrobe'
 import { useLook, useModel, useModels, usePatternDetail } from './api'
 import { SaveControls } from './SaveControls'
@@ -62,6 +62,7 @@ function Editor({ lookId, initial }: { lookId: string | null; initial?: EditorIn
   )
   const [patternScale, setPatternScale] = useState(initial?.patternScale ?? PATTERN_SCALE.default)
   const patternDetail = usePatternDetail(selectedPatternId)
+  const previewRef = useRef<CaptureFn | null>(null)
 
   if (models.isError || colors.isError || patterns.isError || model.isError) {
     return (
@@ -90,6 +91,7 @@ function Editor({ lookId, initial }: { lookId: string | null; initial?: EditorIn
     <Viewer
       modelUrl={glbUrl}
       material={material}
+      previewRef={previewRef}
       caption={
         <>
           <span>{lookId && initial?.name ? <b>{initial.name}</b> : 'unsaved look'}</span>
@@ -125,6 +127,7 @@ function Editor({ lookId, initial }: { lookId: string | null; initial?: EditorIn
           <SaveControls
             lookId={lookId}
             lookName={initial?.name}
+            previewRef={previewRef}
             payload={{
               garmentModelId: modelId,
               colorId: activeColor?.id,

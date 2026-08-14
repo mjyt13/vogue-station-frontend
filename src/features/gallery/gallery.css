@@ -42,12 +42,37 @@
   background: #fff;
 }
 
+.gallery-card__hover {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.45);
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.gallery-card:hover .gallery-card__hover,
+.gallery-card:focus-within .gallery-card__hover {
+  opacity: 1;
+}
+
+.gallery-card__hover button {
+  padding: 0.4rem 0.9rem;
+}
+
 .gallery-card__swatch img {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+/* Old-style cards (no captured preview yet): pattern tile multiplied over the
+   flat color swatch. `.gallery-card__preview` is a real render — no blend. */
+.gallery-card__pattern-img {
   mix-blend-mode: multiply;
 }
 
