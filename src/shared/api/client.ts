@@ -4,7 +4,7 @@ import { clearAccessToken, getAccessToken, setAccessToken } from './auth-token'
 
 export const API_BASE_URL = import.meta.env.VITE_API_URL
 
-const isAuthPath = (url: string) => new URL(url).pathname.startsWith('/auth/')
+const isAuthPath = (url: string) => new URL(url).pathname.includes('/auth/')
 
 // --- "session ended" signal ------------------------------------------------
 // When a refresh fails, the session is gone; the app (AuthProvider) subscribes
@@ -44,7 +44,7 @@ function refreshAccessToken(): Promise<string | null> {
 // Attaches the bearer token, and on a 401 (for non-/auth calls) refreshes once
 // and retries. /auth/* calls rely on the httpOnly refresh cookie instead.
 const authFetch: typeof fetch = async (input, init) => {
-  const request = new Request(input, init)
+  const request = new Request(input, {...init, credentials: 'include'})
   const isAuth = isAuthPath(request.url)
 
   const send = (token: string | null) => {
