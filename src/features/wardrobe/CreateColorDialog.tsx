@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { getApiErrorMessage } from '../../shared/api'
+import { ColorPicker } from '../../shared/ColorPicker'
 import { Modal } from '../../shared/Modal'
 import { useCreateColor } from './api'
 
@@ -52,10 +53,10 @@ export function CreateColorDialog() {
             onChange={(e) => setName(e.target.value)}
           />
         </label>
-        <label className="dialog-field">
-          Color
-          <input type="color" value={hex} onChange={(e) => setHex(e.target.value)} />
-        </label>
+        <div className="dialog-field">
+          <span>Color</span>
+          <ColorPicker value={hex} onChange={setHex} />
+        </div>
         <div className="dialog-actions">
           <button type="button" className="dialog-btn" onClick={() => setOpen(false)}>
             Cancel

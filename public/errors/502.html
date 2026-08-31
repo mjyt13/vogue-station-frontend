@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>Vogue Station — service unavailable</title>
+    <style>
+      :root {
+        --bg: #f4f3f5;
+        --fg: #131316;
+        --muted: #6b6770;
+        --rule: #d8d5db;
+        --accent: #a8813c;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #131316;
+          --fg: #f1eff2;
+          --muted: #ada9b2;
+          --rule: #322f35;
+          --accent: #c9a15c;
+        }
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        height: 100%;
+      }
+      body {
+        margin: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--bg);
+        color: var(--fg);
+        font-family:
+          -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      }
+      .card {
+        max-width: 30rem;
+        padding: 0 1.5rem;
+        text-align: center;
+      }
+      .code {
+        font-size: 0.85rem;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--accent);
+        margin: 0 0 0.75rem;
+      }
+      h1 {
+        font-size: 1.6rem;
+        margin: 0 0 0.75rem;
+      }
+      p {
+        color: var(--muted);
+        line-height: 1.5;
+        margin: 0 0 1.75rem;
+      }
+      button {
+        font: inherit;
+        font-size: 0.9rem;
+        padding: 0.65rem 1.5rem;
+        border-radius: 999px;
+        border: 1px solid var(--rule);
+        background: transparent;
+        color: var(--fg);
+        cursor: pointer;
+      }
+      button:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+      }
+    </style>
+  </head>
+  <body>
+    <main class="card">
+      <p class="code">Error 502</p>
+      <h1>We can't reach the server</h1>
+      <p>
+        Vogue Station's backend is temporarily unreachable. This usually
+        resolves on its own within a few minutes — try again shortly.
+      </p>
+      <button type="button" onclick="location.reload()">Retry</button>
+    </main>
+  </body>
+</html>

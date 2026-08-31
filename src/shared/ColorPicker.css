@@ -1,0 +1,38 @@
+.color-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.color-picker__top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.color-picker__swatch {
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  border: 1px solid var(--ed-rule);
+}
+
+.color-picker__hex {
+  flex: 1;
+  font-family: var(--ed-font-mono);
+  text-transform: lowercase;
+}
+
+.color-picker__body {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.color-picker__sliders {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}

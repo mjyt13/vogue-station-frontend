@@ -3,6 +3,11 @@ import { api } from '../../shared/api'
 
 type Action = 'approve' | 'reject'
 
+// Resolving a pending look's dependencies needs every pattern/color/model
+// (any owner, any status), not just the pending queue — the API caps a page
+// at 50 (see cabinet/api.ts's MINE_LIMIT), so request the max.
+const ALL_LIMIT = 50
+
 // Moderation queues: patterns/models/colors that requested publish, and
 // pending looks.
 export function usePendingPatterns() {
@@ -52,6 +57,41 @@ export function usePendingLooks() {
         params: { query: { status: 'PENDING' } },
       })
       if (error || !data) throw error ?? new Error('Failed to load pending looks')
+      return data.items
+    },
+  })
+}
+
+// Every pattern/color/model regardless of owner or status, used to resolve a
+// pending look's dependencies for the "approve these first" modal.
+export function useAllPatterns() {
+  return useQuery({
+    queryKey: ['admin', 'patterns', 'all'],
+    queryFn: async () => {
+      const { data, error } = await api.GET('/admin/patterns', { params: { query: { limit: ALL_LIMIT } } })
+      if (error || !data) throw error ?? new Error('Failed to load patterns')
+      return data.items
+    },
+  })
+}
+
+export function useAllColors() {
+  return useQuery({
+    queryKey: ['admin', 'colors', 'all'],
+    queryFn: async () => {
+      const { data, error } = await api.GET('/admin/colors', { params: { query: { limit: ALL_LIMIT } } })
+      if (error || !data) throw error ?? new Error('Failed to load colors')
+      return data.items
+    },
+  })
+}
+
+export function useAllModels() {
+  return useQuery({
+    queryKey: ['admin', 'models', 'all'],
+    queryFn: async () => {
+      const { data, error } = await api.GET('/admin/models', { params: { query: { limit: ALL_LIMIT } } })
+      if (error || !data) throw error ?? new Error('Failed to load models')
       return data.items
     },
   })

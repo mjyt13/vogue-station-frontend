@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 
 # ---- build: install full deps (vite/tsc are devDependencies) and emit the static bundle ----
-FROM node:20-alpine AS build
+FROM node:24-alpine AS build
 WORKDIR /app
 COPY package.json package-lock.json .npmrc ./
 RUN npm ci
@@ -14,7 +14,7 @@ ENV VITE_API_URL=${VITE_API_URL}
 RUN npm run build
 
 # ---- runtime: static files only, served by nginx — no Node/node_modules needed ----
-FROM docker.io/nginxinc/nginx-unprivileged:1.27-alpine AS runtime
+FROM docker.io/nginxinc/nginx-unprivileged:1.30-alpine AS runtime
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=build /app/dist /usr/share/nginx/html
 

@@ -110,6 +110,45 @@ npm run api:types    # regenerate the typed API client from docs/openapi.json
 
 Seeded dev login: `admin@vogue.dev` / `admin-password-123`.
 
+## Running with Docker
+
+The `Dockerfile` + `docker-compose.yml` here build this frontend into a
+static bundle and serve it with nginx — they don't run the backend or its
+Postgres/MinIO. Point the container at a `vogue-station-backend` you're
+already running separately (its own `docker compose`, or `npm run
+start:dev`):
+
+```bash
+# VITE_API_URL is baked into the JS bundle at build time (Vite inlines
+# import.meta.env.VITE_*), so it must be a URL the *browser* can reach — not
+# a container DNS name like http://backend:3000 — and changing it means
+# rebuilding the image, not just restarting the container.
+VITE_API_URL=http://localhost:3000 docker compose up -d --build
+```
+
+The container only binds `127.0.0.1:5173` — it's meant to sit behind a
+reverse proxy (Caddy/nginx) on the host that terminates TLS and forwards to
+it, the same way the production deployment is set up. For local testing
+without a proxy in front, use `npm run dev` / `npm run preview` instead.
+
+`docker compose up -d` (no `--build`) reuses the existing image; rebuild
+whenever `VITE_API_URL` or the source changes.
+
+### Steam Deck
+
+SteamOS's Desktop Mode terminal (Konsole from Discover, or any other
+Flatpak'd terminal) runs inside a sandbox, so `docker`/`podman` on the host
+aren't directly reachable — prefix host commands with `flatpak-spawn --host`:
+
+```bash
+flatpak-spawn --host podman compose up -d --build   # or docker compose
+flatpak-spawn --host podman compose down
+flatpak-spawn --host podman ps                       # confirm what's running
+```
+
+This applies to any container command run from a sandboxed Deck terminal,
+not just compose — e.g. `flatpak-spawn --host podman logs <container>`.
+
 ## Project structure
 
 ```

@@ -9,11 +9,14 @@ export const AxisSlider = (props: {
   max: number
   step: number
   onChange: (value: number) => void
+  precision?: number
+  unit?: string
 }) => {
   return (
     <label className="axis-slider">
       <span>
-        {props.label} = {props.value.toFixed(2)}
+        {props.label} = {props.value.toFixed(props.precision ?? 2)}
+        {props.unit ?? ''}
       </span>
       <input
         type="range"
