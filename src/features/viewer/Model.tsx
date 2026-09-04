@@ -41,6 +41,10 @@ export function Model({
   // back to no map (color only) instead of throwing and crashing the Canvas.
   // Keyed by url so the "no pattern" case needs no synchronous setState.
   const [loaded, setLoaded] = useState<{ url: string; texture: Texture } | null>(null)
+  // Set (only from the async load callback/errback below) once the *current*
+  // patternUrl has settled, success or failure — never written synchronously
+  // from the effect body itself.
+  const [erroredUrl, setErroredUrl] = useState<string | null>(null)
   useEffect(() => {
     if (!patternUrl) return
     let cancelled = false
@@ -55,7 +59,10 @@ export function Model({
       },
       undefined,
       () => {
-        if (!cancelled) setLoaded(null) // broken/expired pattern → color only
+        if (!cancelled) {
+          setLoaded(null) // broken/expired pattern → color only
+          setErroredUrl(patternUrl)
+        }
       },
     )
     return () => {
@@ -63,6 +70,16 @@ export function Model({
     }
   }, [patternUrl])
   const texture = loaded && loaded.url === patternUrl ? loaded.texture : null
+  const textureReady = !patternUrl || loaded?.url === patternUrl || erroredUrl === patternUrl
+
+  // First-paint gate only: once the model has shown once with its material
+  // fully resolved, later pattern swaps keep it visible (mat.map just swaps
+  // in place) rather than hiding it again while the new texture loads.
+  // Adjusting state during render (guarded so it only fires once) is the
+  // React-sanctioned way to latch a derived value — see "storing information
+  // from previous renders" in the React docs.
+  const [everReady, setEverReady] = useState(textureReady)
+  if (textureReady && !everReady) setEverReady(true)
 
   const { root, offset, scale } = useMemo(() => {
     const root = scene.clone(true)
@@ -101,7 +118,7 @@ export function Model({
       rotation={[rotation.x, rotation.y, rotation.z]}
     >
       <group position={[offset.x, offset.y, offset.z]} scale={scale}>
-        <primitive object={root} />
+        {everReady && <primitive object={root} />}
       </group>
     </group>
   )

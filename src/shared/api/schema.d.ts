@@ -630,7 +630,7 @@ export interface components {
             confirmed: boolean;
             publishRequested: boolean;
             /** @enum {string} */
-            status: "PENDING" | "APPROVED" | "REJECTED";
+            status: "PENDING" | "APPROVED" | "REJECTED" | "DELISTED";
             isPublic: boolean;
             /** @description null = official catalog item */
             ownerId: Record<string, never> | null;
@@ -668,7 +668,7 @@ export interface components {
             confirmed: boolean;
             publishRequested: boolean;
             /** @enum {string} */
-            status: "PENDING" | "APPROVED" | "REJECTED";
+            status: "PENDING" | "APPROVED" | "REJECTED" | "DELISTED";
             isPublic: boolean;
             /** @description null = official catalog item */
             ownerId: Record<string, never> | null;
@@ -681,7 +681,7 @@ export interface components {
         };
         ModerateDto: {
             /** @enum {string} */
-            action: "approve" | "reject";
+            action: "approve" | "reject" | "delist";
         };
         ColorResponse: {
             /** Format: uuid */
@@ -694,7 +694,7 @@ export interface components {
             ownerId: Record<string, never> | null;
             publishRequested: boolean;
             /** @enum {string} */
-            status: "PENDING" | "APPROVED" | "REJECTED";
+            status: "PENDING" | "APPROVED" | "REJECTED" | "DELISTED";
             isPublic: boolean;
             /** Format: date-time */
             createdAt: string;
@@ -725,7 +725,7 @@ export interface components {
             /** @description Owner asked for this pattern to go public */
             publishRequested: boolean;
             /** @enum {string} */
-            status: "PENDING" | "APPROVED" | "REJECTED";
+            status: "PENDING" | "APPROVED" | "REJECTED" | "DELISTED";
             isPublic: boolean;
             /** @description null = global preset */
             ownerId: Record<string, never> | null;
@@ -765,7 +765,7 @@ export interface components {
             /** @description Owner asked for this pattern to go public */
             publishRequested: boolean;
             /** @enum {string} */
-            status: "PENDING" | "APPROVED" | "REJECTED";
+            status: "PENDING" | "APPROVED" | "REJECTED" | "DELISTED";
             isPublic: boolean;
             /** @description null = global preset */
             ownerId: Record<string, never> | null;
@@ -800,7 +800,7 @@ export interface components {
             /** @description Owner asked for this look to appear in the gallery */
             publishRequested: boolean;
             /** @enum {string} */
-            status: "PENDING" | "APPROVED" | "REJECTED";
+            status: "PENDING" | "APPROVED" | "REJECTED" | "DELISTED";
             isPublic: boolean;
             /** @description Short-lived presigned URL of the client-rendered static preview, or null until one is confirmed */
             thumbnailUrl?: Record<string, never> | null;
@@ -1247,7 +1247,7 @@ export interface operations {
                 limit?: number;
                 /** @description Only items owned by the caller (cabinet view) */
                 mine?: boolean;
-                status?: "PENDING" | "APPROVED" | "REJECTED";
+                status?: "PENDING" | "APPROVED" | "REJECTED" | "DELISTED";
                 requested?: boolean;
             };
             header?: never;
@@ -1385,7 +1385,7 @@ export interface operations {
                 limit?: number;
                 /** @description Only items owned by the caller (cabinet view) */
                 mine?: boolean;
-                status?: "PENDING" | "APPROVED" | "REJECTED";
+                status?: "PENDING" | "APPROVED" | "REJECTED" | "DELISTED";
                 requested?: boolean;
             };
             header?: never;
@@ -1565,7 +1565,7 @@ export interface operations {
                 limit?: number;
                 /** @description Only items owned by the caller (cabinet view) */
                 mine?: boolean;
-                status?: "PENDING" | "APPROVED" | "REJECTED";
+                status?: "PENDING" | "APPROVED" | "REJECTED" | "DELISTED";
                 confirmed?: boolean;
                 requested?: boolean;
             };
@@ -1820,7 +1820,7 @@ export interface operations {
                 limit?: number;
                 /** @description Only items owned by the caller (cabinet view) */
                 mine?: boolean;
-                status?: "PENDING" | "APPROVED" | "REJECTED";
+                status?: "PENDING" | "APPROVED" | "REJECTED" | "DELISTED";
             };
             header?: never;
             path?: never;

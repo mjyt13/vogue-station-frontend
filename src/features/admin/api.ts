@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '../../shared/api'
 
-type Action = 'approve' | 'reject'
+type Action = 'approve' | 'reject' | 'delist'
 
 // Resolving a pending look's dependencies needs every pattern/color/model
 // (any owner, any status), not just the pending queue — the API caps a page
@@ -57,6 +57,60 @@ export function usePendingLooks() {
         params: { query: { status: 'PENDING' } },
       })
       if (error || !data) throw error ?? new Error('Failed to load pending looks')
+      return data.items
+    },
+  })
+}
+
+// Published (approved + public) items, for the admin's discontinue view.
+// status APPROVED implies isPublic — approve is the only path to public.
+export function usePublishedPatterns() {
+  return useQuery({
+    queryKey: ['admin', 'patterns', 'published'],
+    queryFn: async () => {
+      const { data, error } = await api.GET('/admin/patterns', {
+        params: { query: { status: 'APPROVED', limit: ALL_LIMIT } },
+      })
+      if (error || !data) throw error ?? new Error('Failed to load published patterns')
+      return data.items
+    },
+  })
+}
+
+export function usePublishedModels() {
+  return useQuery({
+    queryKey: ['admin', 'models', 'published'],
+    queryFn: async () => {
+      const { data, error } = await api.GET('/admin/models', {
+        params: { query: { status: 'APPROVED', limit: ALL_LIMIT } },
+      })
+      if (error || !data) throw error ?? new Error('Failed to load published models')
+      return data.items
+    },
+  })
+}
+
+export function usePublishedColors() {
+  return useQuery({
+    queryKey: ['admin', 'colors', 'published'],
+    queryFn: async () => {
+      const { data, error } = await api.GET('/admin/colors', {
+        params: { query: { status: 'APPROVED', limit: ALL_LIMIT } },
+      })
+      if (error || !data) throw error ?? new Error('Failed to load published colors')
+      return data.items
+    },
+  })
+}
+
+export function usePublishedLooks() {
+  return useQuery({
+    queryKey: ['admin', 'looks', 'published'],
+    queryFn: async () => {
+      const { data, error } = await api.GET('/admin/looks', {
+        params: { query: { status: 'APPROVED', limit: ALL_LIMIT } },
+      })
+      if (error || !data) throw error ?? new Error('Failed to load published looks')
       return data.items
     },
   })

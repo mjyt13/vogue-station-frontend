@@ -8,7 +8,9 @@ import { Modal } from '../../shared/Modal'
 import { computeLookDeps, isDepInReview, type PublishDep } from '../../shared/publishDeps'
 import { StatusBadge } from '../../shared/StatusBadge'
 import {
+  useDeleteColor,
   useDeleteLook,
+  useDeleteModel,
   useDeletePattern,
   useMyColors,
   useMyLooks,
@@ -33,12 +35,24 @@ export function CabinetPage() {
           <Tabs.Trigger className="cabinet-tab" value="patterns">
             Patterns
           </Tabs.Trigger>
+          <Tabs.Trigger className="cabinet-tab" value="colors">
+            Colors
+          </Tabs.Trigger>
+          <Tabs.Trigger className="cabinet-tab" value="models">
+            Models
+          </Tabs.Trigger>
         </Tabs.List>
         <Tabs.Content value="looks">
           <LooksTab />
         </Tabs.Content>
         <Tabs.Content value="patterns">
           <PatternsTab />
+        </Tabs.Content>
+        <Tabs.Content value="colors">
+          <ColorsTab />
+        </Tabs.Content>
+        <Tabs.Content value="models">
+          <ModelsTab />
         </Tabs.Content>
       </Tabs.Root>
     </div>
@@ -126,17 +140,29 @@ function LooksTab() {
     <>
       <ul className="cabinet-grid">
         {looks.data?.map((look) => {
+          const thumbnailUrl = look.thumbnailUrl as unknown as string | null
           const patternUrl = look.material.patternUrl as unknown as string | null
           return (
             <li key={look.id} className="cab-card">
-              <span className="cab-card__swatch" style={{ background: look.material.color }}>
-                {patternUrl && (
+              <span
+                className="cab-card__swatch"
+                style={thumbnailUrl ? undefined : { background: look.material.color }}
+              >
+                {thumbnailUrl ? (
                   <img
-                    src={patternUrl}
+                    src={thumbnailUrl}
                     alt=""
-                    crossOrigin="anonymous"
                     onError={(e) => (e.currentTarget.style.display = 'none')}
                   />
+                ) : (
+                  patternUrl && (
+                    <img
+                      src={patternUrl}
+                      alt=""
+                      crossOrigin="anonymous"
+                      onError={(e) => (e.currentTarget.style.display = 'none')}
+                    />
+                  )
                 )}
               </span>
               <div className="cab-card__body">
@@ -260,6 +286,133 @@ function PatternsTab() {
                   disabled={del.isPending}
                   onClick={() => {
                     if (window.confirm(`Delete “${pattern.name}”?`)) del.mutate(pattern.id)
+                  }}
+                >
+                  Delete
+                </button>
+              </div>
+            </li>
+          )
+        })}
+      </ul>
+      <ErrorDialog title="Publishing failed" message={error} onClose={() => setError(null)} />
+    </>
+  )
+}
+
+function ColorsTab() {
+  const colors = useMyColors()
+  const del = useDeleteColor()
+  const publish = usePublishColor()
+  const [error, setError] = useState<string | null>(null)
+
+  if (colors.isLoading) return <p className="cabinet-status">Loading…</p>
+  if (colors.isError)
+    return <p className="cabinet-status cabinet-status--error">Couldn’t load your colors.</p>
+  if (colors.data?.length === 0) {
+    return <p className="cabinet-status">No colors yet — create one in the editor.</p>
+  }
+
+  return (
+    <>
+      <ul className="cabinet-grid">
+        {colors.data?.map((color) => (
+          <li key={color.id} className="cab-card">
+            <span className="cab-card__swatch" style={{ background: color.hex }} />
+            <div className="cab-card__body">
+              <span className="cab-card__name">{color.name}</span>
+              <StatusBadge item={color} />
+            </div>
+            <div className="cab-card__actions">
+              {canRequestPublish(color) && (
+                <button
+                  type="button"
+                  className="cab-btn cab-btn--primary"
+                  disabled={publish.isPending}
+                  onClick={() =>
+                    publish.mutate(color.id, {
+                      onError: (e) => setError(getApiErrorMessage(e, 'Could not publish the color')),
+                    })
+                  }
+                >
+                  Publish
+                </button>
+              )}
+              <button
+                type="button"
+                className="cab-btn"
+                disabled={del.isPending}
+                onClick={() => {
+                  if (window.confirm(`Delete “${color.name}”?`)) del.mutate(color.id)
+                }}
+              >
+                Delete
+              </button>
+            </div>
+          </li>
+        ))}
+      </ul>
+      <ErrorDialog title="Publishing failed" message={error} onClose={() => setError(null)} />
+    </>
+  )
+}
+
+function ModelsTab() {
+  const models = useMyModels()
+  const del = useDeleteModel()
+  const publish = usePublishModel()
+  const [error, setError] = useState<string | null>(null)
+
+  if (models.isLoading) return <p className="cabinet-status">Loading…</p>
+  if (models.isError)
+    return <p className="cabinet-status cabinet-status--error">Couldn’t load your models.</p>
+  if (models.data?.length === 0) {
+    return <p className="cabinet-status">No models yet — upload one in the editor.</p>
+  }
+
+  return (
+    <>
+      <ul className="cabinet-grid">
+        {models.data?.map((model) => {
+          const thumbnailUrl = model.thumbnailUrl as unknown as string | null
+          return (
+            <li key={model.id} className="cab-card">
+              <span className="cab-card__swatch">
+                {thumbnailUrl && (
+                  <img
+                    src={thumbnailUrl}
+                    alt=""
+                    crossOrigin="anonymous"
+                    onError={(e) => (e.currentTarget.style.display = 'none')}
+                  />
+                )}
+              </span>
+              <div className="cab-card__body">
+                <span className="cab-card__name">{model.name}</span>
+                <StatusBadge item={model} />
+              </div>
+              <div className="cab-card__actions">
+                {model.confirmed && canRequestPublish(model) && (
+                  <button
+                    type="button"
+                    className="cab-btn cab-btn--primary"
+                    disabled={publish.isPending}
+                    onClick={() =>
+                      publish.mutate(model.id, {
+                        onError: (e) =>
+                          setError(getApiErrorMessage(e, 'Could not publish the model')),
+                      })
+                    }
+                  >
+                    Publish
+                  </button>
+                )}
+                <button
+                  type="button"
+                  className="cab-btn"
+                  disabled={del.isPending}
+                  onClick={() => {
+                    if (window.confirm(`Delete “${model.name}”?`)) del.mutate(model.id)
                   }}
                 >
                   Delete

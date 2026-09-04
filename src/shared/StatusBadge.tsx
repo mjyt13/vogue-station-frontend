@@ -1,3 +1,4 @@
+import type { ModerationStatus } from './api'
 import './StatusBadge.css'
 
 // Moderation status for any ownable, publishable entity (looks, patterns).
@@ -6,14 +7,16 @@ import './StatusBadge.css'
 export function StatusBadge({
   item,
 }: {
-  item: { isPublic: boolean; publishRequested: boolean; status: 'PENDING' | 'APPROVED' | 'REJECTED' }
+  item: { isPublic: boolean; publishRequested: boolean; status: ModerationStatus }
 }) {
   const badge = item.isPublic
     ? { kind: 'public', label: 'Public' }
     : item.status === 'REJECTED'
       ? { kind: 'rejected', label: 'Rejected' }
-      : item.publishRequested
-        ? { kind: 'review', label: 'In review' }
-        : { kind: 'private', label: 'Private' }
+      : item.status === 'DELISTED'
+        ? { kind: 'delisted', label: 'Delisted' }
+        : item.publishRequested
+          ? { kind: 'review', label: 'In review' }
+          : { kind: 'private', label: 'Private' }
   return <span className={`status-badge status-badge--${badge.kind}`}>{badge.label}</span>
 }

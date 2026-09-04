@@ -14,6 +14,8 @@ export type AuthResponse = { user: User; accessToken: string }
 
 // Convenience aliases for the schema-typed catalog responses.
 export type ColorResponse = components['schemas']['ColorResponse']
+// The moderation state machine, shared by every publishable entity.
+export type ModerationStatus = ColorResponse['status']
 export type PatternResponse = components['schemas']['PatternResponse']
 export type ModelResponse = components['schemas']['ModelResponse']
 export type ModelDetailResponse = components['schemas']['ModelDetailResponse']

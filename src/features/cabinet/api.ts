@@ -105,6 +105,28 @@ export function useDeletePattern() {
   })
 }
 
+export function useDeleteColor() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await api.DELETE('/colors/{id}', { params: { path: { id } } })
+      if (error) throw error
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['colors'] }),
+  })
+}
+
+export function useDeleteModel() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await api.DELETE('/models/{id}', { params: { path: { id } } })
+      if (error) throw error
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['models'] }),
+  })
+}
+
 export function usePublishLook() {
   const queryClient = useQueryClient()
   return useMutation({

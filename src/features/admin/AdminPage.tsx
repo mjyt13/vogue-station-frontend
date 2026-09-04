@@ -1,5 +1,6 @@
 import * as Tabs from '@radix-ui/react-tabs'
 import { useState } from 'react'
+import type { ReactNode } from 'react'
 import { getApiErrorMessage } from '../../shared/api'
 import { DepList } from '../../shared/DepList'
 import { ErrorDialog } from '../../shared/ErrorDialog'
@@ -17,6 +18,10 @@ import {
   usePendingLooks,
   usePendingModels,
   usePendingPatterns,
+  usePublishedColors,
+  usePublishedLooks,
+  usePublishedModels,
+  usePublishedPatterns,
 } from './api'
 import './admin.css'
 
@@ -56,93 +61,298 @@ export function AdminPage() {
   )
 }
 
-function PatternQueue() {
-  const pending = usePendingPatterns()
-  const moderate = useModeratePattern()
-  const [error, setError] = useState<string | null>(null)
+type QueueView = 'pending' | 'published'
 
-  if (pending.isLoading) return <p className="admin-status">Loading…</p>
-  if (pending.isError) return <p className="admin-status admin-status--error">Couldn’t load the queue.</p>
-  if (pending.data?.length === 0) return <p className="admin-status">Nothing to review. 🎉</p>
+function ViewToggle({ view, onChange }: { view: QueueView; onChange: (view: QueueView) => void }) {
+  return (
+    <div className="queue-toggle">
+      {(['pending', 'published'] as const).map((v) => (
+        <button
+          key={v}
+          type="button"
+          className={`queue-toggle__btn${view === v ? ' queue-toggle__btn--active' : ''}`}
+          onClick={() => onChange(v)}
+        >
+          {v === 'pending' ? 'Pending' : 'Published'}
+        </button>
+      ))}
+    </div>
+  )
+}
+
+// Loading / error / empty states for a pending queue; null once there's data.
+function PendingStatus({
+  query,
+}: {
+  query: { isLoading: boolean; isError: boolean; data?: { length: number } }
+}) {
+  if (query.isLoading) return <p className="admin-status">Loading…</p>
+  if (query.isError) return <p className="admin-status admin-status--error">Couldn’t load the queue.</p>
+  if (query.data?.length === 0) return <p className="admin-status">Nothing to review. 🎉</p>
+  return null
+}
+
+// The discontinue view: published items with a Delist action. The confirm
+// modal warns which public looks are built on a pattern/color/model and will
+// be taken down with it (the backend cascades the delist).
+function PublishedGrid<T extends { id: string; name: string }>({
+  query,
+  renderSwatch,
+  affectedFor,
+  mutation,
+  onError,
+}: {
+  query: { data?: T[]; isLoading: boolean; isError: boolean }
+  renderSwatch: (item: T) => ReactNode
+  affectedFor: (id: string) => { id: string; name: string }[]
+  mutation: {
+    mutate: (
+      vars: { id: string; action: 'approve' | 'reject' | 'delist' },
+      options?: { onError?: (error: unknown) => void },
+    ) => void
+    isPending: boolean
+  }
+  onError: (message: string) => void
+}) {
+  const [target, setTarget] = useState<T | null>(null)
+
+  if (query.isLoading) return <p className="admin-status">Loading…</p>
+  if (query.isError) return <p className="admin-status admin-status--error">Couldn’t load published items.</p>
+  if (query.data?.length === 0) return <p className="admin-status">Nothing published yet.</p>
+
+  const affected = target ? affectedFor(target.id) : []
 
   return (
     <>
       <ul className="admin-grid">
-        {pending.data?.map((pattern) => {
-          const thumbnailUrl = pattern.thumbnailUrl as unknown as string | null
-          return (
-            <li key={pattern.id} className="mod-card">
-              <span className="mod-card__swatch">
-                {thumbnailUrl && <img src={thumbnailUrl} alt="" crossOrigin="anonymous" />}
-              </span>
-              <span className="mod-card__name">{pattern.name}</span>
-              <ModActions id={pattern.id} mutation={moderate} onError={setError} />
-            </li>
-          )
-        })}
+        {query.data?.map((item) => (
+          <li key={item.id} className="mod-card">
+            {renderSwatch(item)}
+            <span className="mod-card__name">{item.name}</span>
+            <div className="mod-card__actions">
+              <button
+                type="button"
+                className="mod-btn mod-btn--reject"
+                disabled={mutation.isPending}
+                onClick={() => setTarget(item)}
+              >
+                Discontinue
+              </button>
+            </div>
+          </li>
+        ))}
       </ul>
+      <Modal
+        open={target !== null}
+        onOpenChange={(open) => {
+          if (!open) setTarget(null)
+        }}
+        title="Discontinue this?"
+      >
+        <p className="dialog-desc">
+          “{target?.name}” will leave the gallery and become delisted. The owner keeps it and can
+          resubmit it for review later.
+        </p>
+        {affected.length > 0 && (
+          <>
+            <p className="dialog-desc">These public looks are built on it and will be delisted too:</p>
+            <ul className="dep-list">
+              {affected.map((look) => (
+                <li key={look.id} className="dep-list__item">
+                  <div className="dep-list__body">
+                    <span className="dep-list__name">{look.name}</span>
+                    <span className="dep-list__kind">look</span>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
+        <div className="dialog-actions">
+          <button type="button" className="dialog-btn" onClick={() => setTarget(null)}>
+            Cancel
+          </button>
+          <button
+            type="button"
+            className="dialog-btn dialog-btn--primary"
+            onClick={() => {
+              if (!target) return
+              mutation.mutate(
+                { id: target.id, action: 'delist' },
+                { onError: (e) => onError(getApiErrorMessage(e)) },
+              )
+              setTarget(null)
+            }}
+          >
+            Discontinue
+          </button>
+        </div>
+      </Modal>
+    </>
+  )
+}
+
+function PatternQueue() {
+  const [view, setView] = useState<QueueView>('pending')
+  const pending = usePendingPatterns()
+  const published = usePublishedPatterns()
+  const publishedLooks = usePublishedLooks()
+  const moderate = useModeratePattern()
+  const [error, setError] = useState<string | null>(null)
+
+  const affectedFor = (id: string) =>
+    (publishedLooks.data ?? [])
+      .filter((l) => (l.patternId as unknown as string | null) === id)
+      .map((l) => ({ id: l.id, name: l.name }))
+
+  const patternSwatch = (item: { thumbnailUrl?: string }) => {
+    const thumbnailUrl = item.thumbnailUrl as unknown as string | null
+    return (
+      <span className="mod-card__swatch">
+        {thumbnailUrl && <img src={thumbnailUrl} alt="" crossOrigin="anonymous" />}
+      </span>
+    )
+  }
+
+  return (
+    <>
+      <ViewToggle view={view} onChange={setView} />
+      {view === 'pending' ? (
+        <>
+          <PendingStatus query={pending} />
+          {!!pending.data?.length && (
+            <ul className="admin-grid">
+              {pending.data.map((pattern) => (
+                <li key={pattern.id} className="mod-card">
+                  {patternSwatch(pattern)}
+                  <span className="mod-card__name">{pattern.name}</span>
+                  <ModActions id={pattern.id} mutation={moderate} onError={setError} />
+                </li>
+              ))}
+            </ul>
+          )}
+        </>
+      ) : (
+        <PublishedGrid
+          query={published}
+          renderSwatch={patternSwatch}
+          affectedFor={affectedFor}
+          mutation={moderate}
+          onError={setError}
+        />
+      )}
       <ErrorDialog title="Moderation failed" message={error} onClose={() => setError(null)} />
     </>
   )
 }
 
 function ModelQueue() {
+  const [view, setView] = useState<QueueView>('pending')
   const pending = usePendingModels()
+  const published = usePublishedModels()
+  const publishedLooks = usePublishedLooks()
   const moderate = useModerateModel()
   const [error, setError] = useState<string | null>(null)
 
-  if (pending.isLoading) return <p className="admin-status">Loading…</p>
-  if (pending.isError) return <p className="admin-status admin-status--error">Couldn’t load the queue.</p>
-  if (pending.data?.length === 0) return <p className="admin-status">Nothing to review. 🎉</p>
+  const affectedFor = (id: string) =>
+    (publishedLooks.data ?? [])
+      .filter((l) => l.garmentModelId === id)
+      .map((l) => ({ id: l.id, name: l.name }))
+
+  const modelSwatch = (item: { thumbnailUrl?: string }) => {
+    const thumbnailUrl = item.thumbnailUrl as unknown as string | null
+    return (
+      <span className="mod-card__swatch">
+        {thumbnailUrl && <img src={thumbnailUrl} alt="" crossOrigin="anonymous" />}
+      </span>
+    )
+  }
 
   return (
     <>
-      <ul className="admin-grid">
-        {pending.data?.map((model) => {
-          const thumbnailUrl = model.thumbnailUrl as unknown as string | null
-          return (
-            <li key={model.id} className="mod-card">
-              <span className="mod-card__swatch">
-                {thumbnailUrl && <img src={thumbnailUrl} alt="" crossOrigin="anonymous" />}
-              </span>
-              <span className="mod-card__name">{model.name}</span>
-              <ModActions id={model.id} mutation={moderate} onError={setError} />
-            </li>
-          )
-        })}
-      </ul>
+      <ViewToggle view={view} onChange={setView} />
+      {view === 'pending' ? (
+        <>
+          <PendingStatus query={pending} />
+          {!!pending.data?.length && (
+            <ul className="admin-grid">
+              {pending.data.map((model) => (
+                <li key={model.id} className="mod-card">
+                  {modelSwatch(model)}
+                  <span className="mod-card__name">{model.name}</span>
+                  <ModActions id={model.id} mutation={moderate} onError={setError} />
+                </li>
+              ))}
+            </ul>
+          )}
+        </>
+      ) : (
+        <PublishedGrid
+          query={published}
+          renderSwatch={modelSwatch}
+          affectedFor={affectedFor}
+          mutation={moderate}
+          onError={setError}
+        />
+      )}
       <ErrorDialog title="Moderation failed" message={error} onClose={() => setError(null)} />
     </>
   )
 }
 
 function ColorQueue() {
+  const [view, setView] = useState<QueueView>('pending')
   const pending = usePendingColors()
+  const published = usePublishedColors()
+  const publishedLooks = usePublishedLooks()
   const moderate = useModerateColor()
   const [error, setError] = useState<string | null>(null)
 
-  if (pending.isLoading) return <p className="admin-status">Loading…</p>
-  if (pending.isError) return <p className="admin-status admin-status--error">Couldn’t load the queue.</p>
-  if (pending.data?.length === 0) return <p className="admin-status">Nothing to review. 🎉</p>
+  const affectedFor = (id: string) =>
+    (publishedLooks.data ?? [])
+      .filter((l) => (l.colorId as unknown as string | null) === id)
+      .map((l) => ({ id: l.id, name: l.name }))
+
+  const colorSwatch = (item: { hex: string }) => (
+    <span className="mod-card__swatch" style={{ background: item.hex }} />
+  )
 
   return (
     <>
-      <ul className="admin-grid">
-        {pending.data?.map((color) => (
-          <li key={color.id} className="mod-card">
-            <span className="mod-card__swatch" style={{ background: color.hex }} />
-            <span className="mod-card__name">{color.name}</span>
-            <ModActions id={color.id} mutation={moderate} onError={setError} />
-          </li>
-        ))}
-      </ul>
+      <ViewToggle view={view} onChange={setView} />
+      {view === 'pending' ? (
+        <>
+          <PendingStatus query={pending} />
+          {!!pending.data?.length && (
+            <ul className="admin-grid">
+              {pending.data.map((color) => (
+                <li key={color.id} className="mod-card">
+                  {colorSwatch(color)}
+                  <span className="mod-card__name">{color.name}</span>
+                  <ModActions id={color.id} mutation={moderate} onError={setError} />
+                </li>
+              ))}
+            </ul>
+          )}
+        </>
+      ) : (
+        <PublishedGrid
+          query={published}
+          renderSwatch={colorSwatch}
+          affectedFor={affectedFor}
+          mutation={moderate}
+          onError={setError}
+        />
+      )}
       <ErrorDialog title="Moderation failed" message={error} onClose={() => setError(null)} />
     </>
   )
 }
 
 function LookQueue() {
+  const [view, setView] = useState<QueueView>('pending')
   const pending = usePendingLooks()
+  const published = usePublishedLooks()
   const allPatterns = useAllPatterns()
   const allColors = useAllColors()
   const allModels = useAllModels()
@@ -199,51 +409,67 @@ function LookQueue() {
     }
   }
 
-  if (pending.isLoading) return <p className="admin-status">Loading…</p>
-  if (pending.isError) return <p className="admin-status admin-status--error">Couldn’t load the queue.</p>
-  if (pending.data?.length === 0) return <p className="admin-status">Nothing to review. 🎉</p>
+  const lookSwatch = (look: { material: { color: string; patternUrl: unknown } }) => {
+    const patternUrl = look.material.patternUrl as unknown as string | null
+    return (
+      <span className="mod-card__swatch" style={{ background: look.material.color }}>
+        {patternUrl && <img src={patternUrl} alt="" crossOrigin="anonymous" />}
+      </span>
+    )
+  }
 
   const anyPending =
     moderateLook.isPending || moderatePattern.isPending || moderateColor.isPending || moderateModel.isPending
 
   return (
     <>
-      <ul className="admin-grid">
-        {pending.data?.map((look) => {
-          const patternUrl = look.material.patternUrl as unknown as string | null
-          return (
-            <li key={look.id} className="mod-card">
-              <span className="mod-card__swatch" style={{ background: look.material.color }}>
-                {patternUrl && <img src={patternUrl} alt="" crossOrigin="anonymous" />}
-              </span>
-              <span className="mod-card__name">{look.name}</span>
-              <div className="mod-card__actions">
-                <button
-                  type="button"
-                  className="mod-btn mod-btn--approve"
-                  disabled={anyPending}
-                  onClick={() => onApproveClick(look)}
-                >
-                  Approve
-                </button>
-                <button
-                  type="button"
-                  className="mod-btn mod-btn--reject"
-                  disabled={anyPending}
-                  onClick={() =>
-                    moderateLook.mutate(
-                      { id: look.id, action: 'reject' },
-                      { onError: (e) => setError(getApiErrorMessage(e)) },
-                    )
-                  }
-                >
-                  Reject
-                </button>
-              </div>
-            </li>
-          )
-        })}
-      </ul>
+      <ViewToggle view={view} onChange={setView} />
+      {view === 'pending' ? (
+        <>
+          <PendingStatus query={pending} />
+          {!!pending.data?.length && (
+            <ul className="admin-grid">
+              {pending.data.map((look) => (
+                <li key={look.id} className="mod-card">
+                  {lookSwatch(look)}
+                  <span className="mod-card__name">{look.name}</span>
+                  <div className="mod-card__actions">
+                    <button
+                      type="button"
+                      className="mod-btn mod-btn--approve"
+                      disabled={anyPending}
+                      onClick={() => onApproveClick(look)}
+                    >
+                      Approve
+                    </button>
+                    <button
+                      type="button"
+                      className="mod-btn mod-btn--reject"
+                      disabled={anyPending}
+                      onClick={() =>
+                        moderateLook.mutate(
+                          { id: look.id, action: 'reject' },
+                          { onError: (e) => setError(getApiErrorMessage(e)) },
+                        )
+                      }
+                    >
+                      Reject
+                    </button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </>
+      ) : (
+        <PublishedGrid
+          query={published}
+          renderSwatch={lookSwatch}
+          affectedFor={() => []}
+          mutation={moderateLook}
+          onError={setError}
+        />
+      )}
       <Modal
         open={blocked !== null}
         onOpenChange={(open) => {
@@ -282,11 +508,11 @@ function ModActions({
   id: string
   mutation: {
     mutate: (
-      vars: { id: string; action: 'approve' | 'reject' },
+      vars: { id: string; action: 'approve' | 'reject' | 'delist' },
       options?: { onError?: (error: unknown) => void },
     ) => void
     isPending: boolean
-    variables?: { id: string; action: 'approve' | 'reject' }
+    variables?: { id: string; action: 'approve' | 'reject' | 'delist' }
   }
   onError: (message: string) => void
 }) {

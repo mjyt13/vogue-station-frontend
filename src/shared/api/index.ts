@@ -11,6 +11,7 @@ export type {
   LookResponse,
   ModelDetailResponse,
   ModelResponse,
+  ModerationStatus,
   PatternResponse,
   Role,
   User,

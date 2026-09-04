@@ -25,3 +25,8 @@
   color: #1f7a3d;
   background: rgba(58, 157, 84, 0.18);
 }
+
+.status-badge--delisted {
+  color: #5a5f7a;
+  background: rgba(90, 95, 122, 0.16);
+}
