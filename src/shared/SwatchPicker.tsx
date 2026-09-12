@@ -7,7 +7,6 @@ import './SwatchPicker.css'
 // open/close state. Used for both color and pattern pickers.
 export type Swatch = { key: string; name: string; color?: string; image?: string | null }
 
-
 export const SwatchPicker = (props: {
   label: string
   value: string

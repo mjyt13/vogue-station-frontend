@@ -1,7 +1,10 @@
 import { useState } from 'react'
 import { getApiErrorMessage } from '../../shared/api'
 import type { GarmentKind } from '../../shared/api'
+import { AuthPromptModal } from '../../shared/AuthPromptModal'
+import { FileInput } from '../../shared/FileInput'
 import { Modal } from '../../shared/Modal'
+import { useAuth } from '../auth'
 import { useUploadModel } from './api'
 
 const KIND_OPTIONS: { value: GarmentKind; label: string }[] = [
@@ -14,9 +17,16 @@ const KIND_OPTIONS: { value: GarmentKind; label: string }[] = [
 // Upload a garment model (create → PUT .glb → render + PUT a client-side
 // thumbnail → confirm). It's private to the owner until published for
 // moderation, same as patterns.
+//
+// The wardrobe is visible to anonymous visitors (same as the rest of
+// /create), but uploading requires an account — send them to register
+// instead of opening the dialog and letting a 401 leak into it.
 export function UploadModelDialog() {
+  const { status } = useAuth()
+  const authed = status === 'authenticated'
   const upload = useUploadModel()
   const [open, setOpen] = useState(false)
+  const [authPromptOpen, setAuthPromptOpen] = useState(false)
   const [name, setName] = useState('')
   const [kind, setKind] = useState<GarmentKind>('TSHIRT')
   const [file, setFile] = useState<File | null>(null)
@@ -41,12 +51,18 @@ export function UploadModelDialog() {
         type="button"
         className="wardrobe__add"
         onClick={() => {
+          if (!authed) return setAuthPromptOpen(true)
           setError(null)
           setOpen(true)
         }}
       >
         + Model
       </button>
+      <AuthPromptModal
+        open={authPromptOpen}
+        onOpenChange={setAuthPromptOpen}
+        message="To upload a garment model, please register."
+      />
       <Modal open={open} onOpenChange={setOpen} title="Upload garment model">
         <p className="dialog-desc">A .glb file. A preview render is generated automatically.</p>
         {error && (
@@ -81,10 +97,11 @@ export function UploadModelDialog() {
         </label>
         <label className="dialog-field">
           Model file
-          <input
-            type="file"
+          <FileInput
+            label="Choose .glb file"
             accept=".glb,model/gltf-binary"
-            onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+            value={file}
+            onChange={setFile}
           />
         </label>
         <div className="dialog-actions">

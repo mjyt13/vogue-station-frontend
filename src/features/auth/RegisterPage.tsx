@@ -6,7 +6,7 @@ import { useAuth } from './useAuth'
 // Mirrors the backend rule: password 8–128 chars. Confirm field is client-only.
 const schema = z
   .object({
-    email: z.string().email('Enter a valid email'),
+    email: z.email('Enter a valid email'),
     password: z.string().min(8, 'At least 8 characters').max(128, 'At most 128 characters'),
     confirm: z.string(),
   })
@@ -34,7 +34,12 @@ export function RegisterPage() {
         fields={[
           { name: 'email', label: 'Email', type: 'email', autoComplete: 'email' },
           { name: 'password', label: 'Password', type: 'password', autoComplete: 'new-password' },
-          { name: 'confirm', label: 'Confirm password', type: 'password', autoComplete: 'new-password' },
+          {
+            name: 'confirm',
+            label: 'Confirm password',
+            type: 'password',
+            autoComplete: 'new-password',
+          },
         ]}
         onSubmit={async (v) => {
           await register(v.email, v.password)

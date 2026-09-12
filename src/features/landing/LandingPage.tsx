@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import previewUrl from '../../assets/landing/viewport.png'
 import { useAuth } from '../auth'
+import { HeroPreview } from './HeroPreview'
 import './landing.css'
 import { StudioNotes } from './StudioNotes'
 
@@ -44,22 +45,17 @@ export function LandingPage() {
           <div className="landing-copy">
             <h1>Design your garment in 3D</h1>
             <p>
-              Pick colors and patterns and preview them live on a 3D model. Save your looks and
-              come back to refine them anytime.
+              Pick colors and patterns and preview them live on a 3D model. Save your looks and come
+              back to refine them anytime.
             </p>
             <Link className="btn btn--primary btn--lg" to="/create">
               {authed ? 'Open editor' : 'Start creating'}
             </Link>
           </div>
-          <div className="landing-plate">
-            <figure>
-              <img
-                className="landing-preview"
-                src={previewUrl}
-                alt="The Vogue Station editor: a 3D t-shirt with color, pattern, and transform controls"
-              />
-            </figure>
-          </div>
+          <HeroPreview
+            photoSrc={previewUrl}
+            photoAlt="The Vogue Station editor: a 3D t-shirt with color, pattern, and transform controls"
+          />
         </section>
 
         <section className="landing-features">
@@ -75,8 +71,8 @@ export function LandingPage() {
             <span className="feature__index">02</span>
             <h3>Save to your cabinet</h3>
             <p>
-              Every look you build is saved to your cabinet, ready to reopen and refine whenever
-              you come back.
+              Every look you build is saved to your cabinet, ready to reopen and refine whenever you
+              come back.
             </p>
           </div>
           <div className="feature">

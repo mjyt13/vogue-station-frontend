@@ -1,3 +1,4 @@
+import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
 import { clearAccessToken, onSessionEnded } from '../../shared/api'
@@ -11,6 +12,7 @@ import type { AuthStatus } from './auth-context'
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [status, setStatus] = useState<AuthStatus>('loading')
   const [user, setUser] = useState<User | null>(null)
+  const queryClient = useQueryClient()
 
   useEffect(() => {
     let active = true
@@ -34,8 +36,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       onSessionEnded(() => {
         setUser(null)
         setStatus('anonymous')
+        queryClient.clear()
       }),
-    [],
+    [queryClient],
   )
 
   const login = useCallback(async (email: string, password: string) => {
@@ -57,8 +60,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       clearAccessToken()
       setUser(null)
       setStatus('anonymous')
+      // Drop every cached catalog/cabinet/admin query — stale entries for
+      // now-private items would otherwise still be served to the anonymous
+      // session (see ROADMAP item 12c).
+      queryClient.clear()
     }
-  }, [])
+  }, [queryClient])
 
   return (
     <AuthContext.Provider value={{ status, user, login, register, logout }}>

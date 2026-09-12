@@ -87,7 +87,8 @@ function PendingStatus({
   query: { isLoading: boolean; isError: boolean; data?: { length: number } }
 }) {
   if (query.isLoading) return <p className="admin-status">Loading…</p>
-  if (query.isError) return <p className="admin-status admin-status--error">Couldn’t load the queue.</p>
+  if (query.isError)
+    return <p className="admin-status admin-status--error">Couldn’t load the queue.</p>
   if (query.data?.length === 0) return <p className="admin-status">Nothing to review. 🎉</p>
   return null
 }
@@ -117,7 +118,8 @@ function PublishedGrid<T extends { id: string; name: string }>({
   const [target, setTarget] = useState<T | null>(null)
 
   if (query.isLoading) return <p className="admin-status">Loading…</p>
-  if (query.isError) return <p className="admin-status admin-status--error">Couldn’t load published items.</p>
+  if (query.isError)
+    return <p className="admin-status admin-status--error">Couldn’t load published items.</p>
   if (query.data?.length === 0) return <p className="admin-status">Nothing published yet.</p>
 
   const affected = target ? affectedFor(target.id) : []
@@ -155,7 +157,9 @@ function PublishedGrid<T extends { id: string; name: string }>({
         </p>
         {affected.length > 0 && (
           <>
-            <p className="dialog-desc">These public looks are built on it and will be delisted too:</p>
+            <p className="dialog-desc">
+              These public looks are built on it and will be delisted too:
+            </p>
             <ul className="dep-list">
               {affected.map((look) => (
                 <li key={look.id} className="dep-list__item">
@@ -364,14 +368,22 @@ function LookQueue() {
   const [blocked, setBlocked] = useState<{ lookId: string; deps: PublishDep[] } | null>(null)
 
   const approveLook = (id: string) => {
-    moderateLook.mutate({ id, action: 'approve' }, { onError: (e) => setError(getApiErrorMessage(e)) })
+    moderateLook.mutate(
+      { id, action: 'approve' },
+      { onError: (e) => setError(getApiErrorMessage(e)) },
+    )
   }
 
   // Mirrors the owner-facing "publish these first" check in CabinetPage: a
   // look can't be approved until its pattern/color/model are public, so show
   // the same kind of blocking-dependency modal instead of letting the
   // backend's rejection surface as a bare error.
-  const onApproveClick = (look: { id: string; patternId?: unknown; colorId?: unknown; garmentModelId: string }) => {
+  const onApproveClick = (look: {
+    id: string
+    patternId?: unknown
+    colorId?: unknown
+    garmentModelId: string
+  }) => {
     const deps = computeLookDeps(look, {
       patterns: allPatterns.data,
       colors: allColors.data,
@@ -395,13 +407,12 @@ function LookQueue() {
     setBlocked(null)
     try {
       await Promise.all(
-        deps
-          .filter(isDepInReview)
-          .map((d) => {
-            if (d.kind === 'pattern') return moderatePattern.mutateAsync({ id: d.id, action: 'approve' })
-            if (d.kind === 'color') return moderateColor.mutateAsync({ id: d.id, action: 'approve' })
-            return moderateModel.mutateAsync({ id: d.id, action: 'approve' })
-          }),
+        deps.filter(isDepInReview).map((d) => {
+          if (d.kind === 'pattern')
+            return moderatePattern.mutateAsync({ id: d.id, action: 'approve' })
+          if (d.kind === 'color') return moderateColor.mutateAsync({ id: d.id, action: 'approve' })
+          return moderateModel.mutateAsync({ id: d.id, action: 'approve' })
+        }),
       )
       await moderateLook.mutateAsync({ id: lookId, action: 'approve' })
     } catch (e) {
@@ -419,7 +430,10 @@ function LookQueue() {
   }
 
   const anyPending =
-    moderateLook.isPending || moderatePattern.isPending || moderateColor.isPending || moderateModel.isPending
+    moderateLook.isPending ||
+    moderatePattern.isPending ||
+    moderateColor.isPending ||
+    moderateModel.isPending
 
   return (
     <>

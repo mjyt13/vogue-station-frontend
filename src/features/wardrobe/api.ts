@@ -114,15 +114,7 @@ async function confirmModel(id: string) {
 export function useUploadModel() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: async ({
-      name,
-      kind,
-      file,
-    }: {
-      name: string
-      kind: GarmentKind
-      file: File
-    }) => {
+    mutationFn: async ({ name, kind, file }: { name: string; kind: GarmentKind; file: File }) => {
       debugUpload('1/4 create record', { name, kind, size: file.size })
       const created = await createModelRecord(name, kind)
       debugUpload('created', created.model.id)

@@ -10,11 +10,7 @@ export type CaptureFn = () => Promise<Blob>
 // scene. Exposes the capture through a ref because a Canvas's gl/scene/camera
 // only exist inside react-three-fiber's tree (via useThree), while the caller
 // (SaveControls) lives outside the Canvas.
-export function CapturePreview({
-  captureRef,
-}: {
-  captureRef: MutableRefObject<CaptureFn | null>
-}) {
+export function CapturePreview({ captureRef }: { captureRef: MutableRefObject<CaptureFn | null> }) {
   const { gl, scene, camera } = useThree()
   useEffect(() => {
     captureRef.current = () =>

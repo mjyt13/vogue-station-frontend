@@ -23,7 +23,10 @@ export function UVMap({ url, material }: { url: string; material: GarmentMateria
   // Collect every mesh's UVs + indices, and the overall UV bounds, once.
   const { geos, bounds } = useMemo(() => {
     const geos: Geo[] = []
-    let minU = Infinity, minV = Infinity, maxU = -Infinity, maxV = -Infinity
+    let minU = Infinity,
+      minV = Infinity,
+      maxU = -Infinity,
+      maxV = -Infinity
     scene.traverse((obj) => {
       if (!(obj instanceof Mesh)) return
       const uvAttr = obj.geometry.getAttribute('uv')
@@ -31,8 +34,10 @@ export function UVMap({ url, material }: { url: string; material: GarmentMateria
       const uv = uvAttr.array as ArrayLike<number>
       geos.push({ uv, index: obj.geometry.index?.array ?? null })
       for (let i = 0; i < uv.length; i += 2) {
-        minU = Math.min(minU, uv[i]); maxU = Math.max(maxU, uv[i])
-        minV = Math.min(minV, uv[i + 1]); maxV = Math.max(maxV, uv[i + 1])
+        minU = Math.min(minU, uv[i])
+        maxU = Math.max(maxU, uv[i])
+        minV = Math.min(minV, uv[i + 1])
+        maxV = Math.max(maxV, uv[i + 1])
       }
     })
     return { geos, bounds: { minU, minV, maxU, maxV } }
@@ -46,7 +51,9 @@ export function UVMap({ url, material }: { url: string; material: GarmentMateria
     const img = new Image()
     img.onload = () => setLoaded({ url: patternUrl, img })
     img.src = patternUrl
-    return () => { img.onload = null }
+    return () => {
+      img.onload = null
+    }
   }, [patternUrl])
 
   useEffect(() => {
@@ -65,7 +72,10 @@ export function UVMap({ url, material }: { url: string; material: GarmentMateria
 
     // Fabric region = the UV bounding box. Fill it with pattern×color (or just
     // color when there's no pattern) — the same math the 3D shader runs.
-    const rx = x(minU), ry = y(maxV), rw = spanU * k, rh = spanV * k
+    const rx = x(minU),
+      ry = y(maxV),
+      rw = spanU * k,
+      rh = spanV * k
     if (pattern) {
       const tile = ctx.createPattern(pattern, 'repeat')!
       const m = new DOMMatrix().scale(k / pattern.width, k / pattern.height)
@@ -93,9 +103,17 @@ export function UVMap({ url, material }: { url: string; material: GarmentMateria
       for (let t = 0; t < triCount; t++, tri++) {
         if (tri % step) continue
         const vi = (c: number) => (g.index ? g.index[t * 3 + c] : t * 3 + c)
-        const p = (c: number) => { const i = vi(c) * 2; return [x(g.uv[i]), y(g.uv[i + 1])] as const }
-        const a = p(0), b = p(1), c = p(2)
-        ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); ctx.lineTo(c[0], c[1]); ctx.closePath()
+        const p = (c: number) => {
+          const i = vi(c) * 2
+          return [x(g.uv[i]), y(g.uv[i + 1])] as const
+        }
+        const a = p(0),
+          b = p(1),
+          c = p(2)
+        ctx.moveTo(a[0], a[1])
+        ctx.lineTo(b[0], b[1])
+        ctx.lineTo(c[0], c[1])
+        ctx.closePath()
       }
     }
     ctx.stroke()

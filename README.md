@@ -51,15 +51,15 @@ becomes public. Two repos, split like a real product would be:
 
 ## Tech stack
 
-|            | Frontend                                                                                          | Backend                                                                                     |
-| ---------- | -------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| Core       | React 19, TypeScript, Vite (React Compiler)                                                        | NestJS 11, TypeScript                                                                            |
-| 3D         | three.js, `@react-three/fiber`, `@react-three/drei`                                                 | —                                                                                                 |
-| Data       | TanStack Query, `openapi-fetch` (typed from the backend's OpenAPI spec)                             | Prisma 7 + Postgres (via `@prisma/adapter-pg`)                                                    |
-| Forms/UI   | React Hook Form + Zod, Radix UI (Dialog/Tabs/Dropdown)                                              | class-validator / class-transformer                                                              |
-| Auth       | in-memory access token, `credentials: include` for the refresh cookie                              | `@nestjs/jwt`, argon2 password hashing                                                            |
-| Storage    | —                                                                                                    | S3-compatible object storage (MinIO locally) via `@aws-sdk/client-s3` + presigned URLs, `sharp` for thumbnails |
-| Routing    | React Router 7                                                                                       | Nest controllers, `@nestjs/throttler` rate limiting                                              |
+|          | Frontend                                                                | Backend                                                                                                        |
+| -------- | ----------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| Core     | React 19, TypeScript, Vite (React Compiler)                             | NestJS 11, TypeScript                                                                                          |
+| 3D       | three.js, `@react-three/fiber`, `@react-three/drei`                     | —                                                                                                              |
+| Data     | TanStack Query, `openapi-fetch` (typed from the backend's OpenAPI spec) | Prisma 7 + Postgres (via `@prisma/adapter-pg`)                                                                 |
+| Forms/UI | React Hook Form + Zod, Radix UI (Dialog/Tabs/Dropdown)                  | class-validator / class-transformer                                                                            |
+| Auth     | in-memory access token, `credentials: include` for the refresh cookie   | `@nestjs/jwt`, argon2 password hashing                                                                         |
+| Storage  | —                                                                       | S3-compatible object storage (MinIO locally) via `@aws-sdk/client-s3` + presigned URLs, `sharp` for thumbnails |
+| Routing  | React Router 7                                                          | Nest controllers, `@nestjs/throttler` rate limiting                                                            |
 
 ## Architecture notes
 
@@ -70,7 +70,7 @@ becomes public. Two repos, split like a real product would be:
   sliders are generated from a `GROUPS × AXES` config with one `AxisSlider`
   component and one handler, not six near-copies.
 - **The viewer knows nothing about the catalog.** `GarmentMaterial =
-  {color, patternUrl, patternScale}` is a pure render contract; the wardrobe
+{color, patternUrl, patternScale}` is a pure render contract; the wardrobe
   feature (colors/patterns/models) hands it one, the viewer just renders it.
 - **Presigned URLs are ephemeral** (~10 min) — fetched right before use,
   never persisted, refetched on a storage 403.

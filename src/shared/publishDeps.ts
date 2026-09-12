@@ -1,9 +1,4 @@
-import type {
-  ColorResponse,
-  ModelResponse,
-  ModerationStatus,
-  PatternResponse,
-} from './api/types'
+import type { ColorResponse, ModelResponse, ModerationStatus, PatternResponse } from './api/types'
 
 // One private dependency (pattern/color/model) blocking a look's publish or
 // approval. Shared between the owner's "publish blocked" modal (CabinetPage)

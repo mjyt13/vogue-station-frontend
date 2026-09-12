@@ -88,7 +88,12 @@ function LooksTab() {
 
   // The gallery only accepts looks whose assets are already public, so warn
   // the owner up front instead of letting the admin's approve fail later.
-  const onPublishClick = (look: { id: string; patternId?: unknown; colorId?: unknown; garmentModelId: string }) => {
+  const onPublishClick = (look: {
+    id: string
+    patternId?: unknown
+    colorId?: unknown
+    garmentModelId: string
+  }) => {
     // A dependency blocks the look as long as it isn't public yet — even if
     // it's already `publishRequested` and sitting in PENDING review (that's
     // just a display detail, not a reason to leave it out: the look still
@@ -127,7 +132,8 @@ function LooksTab() {
   }
 
   if (looks.isLoading) return <p className="cabinet-status">Loading…</p>
-  if (looks.isError) return <p className="cabinet-status cabinet-status--error">Couldn’t load your looks.</p>
+  if (looks.isError)
+    return <p className="cabinet-status cabinet-status--error">Couldn’t load your looks.</p>
   if (looks.data?.length === 0) {
     return (
       <p className="cabinet-status">
@@ -212,8 +218,7 @@ function LooksTab() {
         size="wide"
       >
         <p className="dialog-desc">
-          This look uses private items — publish them so the gallery can show it once it’s
-          approved:
+          This look uses private items — publish them so the gallery can show it once it’s approved:
         </p>
         <DepList deps={blocked?.deps ?? []} />
         <div className="dialog-actions">
@@ -331,7 +336,8 @@ function ColorsTab() {
                   disabled={publish.isPending}
                   onClick={() =>
                     publish.mutate(color.id, {
-                      onError: (e) => setError(getApiErrorMessage(e, 'Could not publish the color')),
+                      onError: (e) =>
+                        setError(getApiErrorMessage(e, 'Could not publish the color')),
                     })
                   }
                 >

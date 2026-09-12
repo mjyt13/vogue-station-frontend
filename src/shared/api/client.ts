@@ -44,7 +44,7 @@ function refreshAccessToken(): Promise<string | null> {
 // Attaches the bearer token, and on a 401 (for non-/auth calls) refreshes once
 // and retries. /auth/* calls rely on the httpOnly refresh cookie instead.
 const authFetch: typeof fetch = async (input, init) => {
-  const request = new Request(input, {...init, credentials: 'include'})
+  const request = new Request(input, { ...init, credentials: 'include' })
   const isAuth = isAuthPath(request.url)
 
   const send = (token: string | null) => {

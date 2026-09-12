@@ -10,6 +10,16 @@
   color: #d63a3a;
 }
 
+.create-notice {
+  padding: 0.6rem 1rem;
+  text-align: center;
+  font-family: var(--ed-font-body);
+  font-size: 14px;
+  color: #8a6414;
+  background: #fdf3dc;
+  border-bottom: 1px solid #f0dca6;
+}
+
 .save-controls {
   display: flex;
   flex-direction: column;
@@ -70,4 +80,16 @@
 .save-controls__primary:disabled {
   opacity: 0.6;
   cursor: default;
+}
+
+.save-controls__error {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #d63a3a;
+}
+
+.save-controls__error a {
+  color: inherit;
+  font-weight: 600;
+  text-decoration: underline;
 }

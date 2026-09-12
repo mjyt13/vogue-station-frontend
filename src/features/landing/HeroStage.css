@@ -1,0 +1,84 @@
+.hero-stage {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  background: #2b2f3a;
+}
+
+.hero-stage__canvas {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.hero-stage__canvas canvas {
+  display: block;
+}
+
+.hero-stage__light {
+  /* Bottom-left, away from the light marker's default top-right spawn point
+     (see INITIAL_LIGHT_POS) so this button never sits on top of it and
+     blocks the very thing it's turning on. */
+  position: absolute;
+  left: 12px;
+  bottom: 12px;
+  padding: 7px 12px;
+  font: inherit;
+  font-family: var(--ed-font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #e5e7eb;
+  background: rgba(20, 22, 28, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 2px;
+  cursor: pointer;
+}
+
+.hero-stage__light--on {
+  color: #1f2430;
+  background: #fff3c0;
+  border-color: #fff3c0;
+}
+
+.hero-stage__swatches {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 14px;
+  background: var(--ed-bg-raised);
+  border-top: 1px solid var(--ed-rule);
+}
+
+.hero-stage__row {
+  display: flex;
+  gap: 8px;
+}
+
+.hero-stage__swatch {
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  outline: 1px solid var(--ed-rule);
+  outline-offset: 1px;
+  background-size: cover;
+  background-position: center;
+  cursor: pointer;
+  font-size: 0.7rem;
+  color: var(--ed-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hero-stage__swatch--none {
+  background: var(--ed-bg);
+}
+
+.hero-stage__swatch--active {
+  border-color: var(--ed-accent);
+}

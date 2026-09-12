@@ -53,8 +53,24 @@ function Editor({ lookId, initial }: { lookId: string | null; initial?: EditorIn
   const models = useModels()
 
   const [selectedModelId, setSelectedModelId] = useState<string | null>(initial?.modelId ?? null)
-  const modelId = selectedModelId ?? models.data?.[0]?.id
-  const model = useModel(modelId)
+  const requestedModelId = selectedModelId ?? models.data?.[0]?.id
+  const model = useModel(requestedModelId)
+
+  // The selected model can 404 without the catalog itself being broken — e.g.
+  // this look references a model that's since been delisted or made private.
+  // Fall back to the first other visible model
+  // instead of taking down the whole editor, and say so instead of
+  // pretending nothing changed.
+  const modelBroken = model.isError && !!models.data?.length
+  const fallbackModelId = modelBroken
+    ? (models.data!.find((m) => m.id !== requestedModelId)?.id ?? models.data![0]?.id)
+    : undefined
+  const fallbackModel = useModel(fallbackModelId)
+  const modelId = modelBroken ? fallbackModelId : requestedModelId
+  const activeModel = modelBroken ? fallbackModel : model
+  const unavailableNotice = modelBroken
+    ? "This look's original model is no longer available — showing a substitute."
+    : null
 
   const [selectedColorId, setSelectedColorId] = useState<string | null>(initial?.colorId ?? null)
   const [selectedPatternId, setSelectedPatternId] = useState<string | null>(
@@ -64,7 +80,8 @@ function Editor({ lookId, initial }: { lookId: string | null; initial?: EditorIn
   const patternDetail = usePatternDetail(selectedPatternId)
   const previewRef = useRef<CaptureFn | null>(null)
 
-  if (models.isError || colors.isError || patterns.isError || model.isError) {
+  const catalogBroken = models.isError || colors.isError || patterns.isError || activeModel.isError
+  if (catalogBroken) {
     return (
       <div className="create-status create-status--error">
         Couldn’t load the catalog. Try again.
@@ -72,72 +89,86 @@ function Editor({ lookId, initial }: { lookId: string | null; initial?: EditorIn
     )
   }
 
-  const glbUrl = model.data?.glbUrl
+  const glbUrl = activeModel.data?.glbUrl
   if (!glbUrl || !modelId || !colors.data || !patterns.data) {
     return <div className="create-status">Loading your studio…</div>
   }
 
   const activeColor = colors.data.find((c) => c.id === selectedColorId) ?? colors.data[0]
+  const colorUnavailable = !!selectedColorId && !colors.data.some((c) => c.id === selectedColorId)
   const activePattern = selectedPatternId
     ? patterns.data.find((p) => p.id === selectedPatternId)
     : undefined
+  const patternUnavailable = !!selectedPatternId && !activePattern
   const material: GarmentMaterial = {
     color: activeColor?.hex ?? '#f5f5f5',
     patternUrl: selectedPatternId ? (patternDetail.data?.patternUrl ?? null) : null,
     patternScale,
   }
+  const notices = [
+    unavailableNotice,
+    colorUnavailable
+      ? "This look's original color is no longer available — showing a substitute."
+      : null,
+    patternUnavailable
+      ? "This look's original pattern is no longer available — pattern removed."
+      : null,
+  ].filter((n): n is string => !!n)
 
   return (
-    <Viewer
-      modelUrl={glbUrl}
-      material={material}
-      previewRef={previewRef}
-      caption={
-        <>
-          <span>{lookId && initial?.name ? <b>{initial.name}</b> : 'unsaved look'}</span>
-          <span>
-            {model.data?.name} · {activeColor?.name}
-            {activePattern ? ` · ${activePattern.name}` : ' · no pattern'}
-          </span>
-        </>
-      }
-      controls={
-        <>
-          <Wardrobe
-            colors={colors.data.map((c) => ({ id: c.id, name: c.name, hex: c.hex }))}
-            patterns={patterns.data.map((p) => ({
-              id: p.id,
-              name: p.name,
-              thumbnailUrl: p.thumbnailUrl,
-            }))}
-            models={(models.data ?? []).map((m) => ({
-              id: m.id,
-              name: m.name,
-              thumbnailUrl: m.thumbnailUrl,
-            }))}
-            selectedColorId={activeColor?.id ?? null}
-            selectedPatternId={selectedPatternId}
-            selectedModelId={modelId ?? null}
-            patternScale={patternScale}
-            onColor={(c) => setSelectedColorId(c.id)}
-            onPattern={setSelectedPatternId}
-            onModel={setSelectedModelId}
-            onScale={setPatternScale}
-          />
-          <SaveControls
-            lookId={lookId}
-            lookName={initial?.name}
-            previewRef={previewRef}
-            payload={{
-              garmentModelId: modelId,
-              colorId: activeColor?.id,
-              colorHex: activeColor?.hex,
-              patternId: selectedPatternId ?? undefined,
-              patternScale,
-            }}
-          />
-        </>
-      }
-    />
+    <>
+      {notices.length > 0 && <div className="create-notice">{notices.join(' ')}</div>}
+      <Viewer
+        modelUrl={glbUrl}
+        material={material}
+        previewRef={previewRef}
+        caption={
+          <>
+            <span>{lookId && initial?.name ? <b>{initial.name}</b> : 'unsaved look'}</span>
+            <span>
+              {activeModel.data?.name} · {activeColor?.name}
+              {activePattern ? ` · ${activePattern.name}` : ' · no pattern'}
+            </span>
+          </>
+        }
+        controls={
+          <>
+            <Wardrobe
+              colors={colors.data.map((c) => ({ id: c.id, name: c.name, hex: c.hex }))}
+              patterns={patterns.data.map((p) => ({
+                id: p.id,
+                name: p.name,
+                thumbnailUrl: p.thumbnailUrl,
+              }))}
+              models={(models.data ?? []).map((m) => ({
+                id: m.id,
+                name: m.name,
+                thumbnailUrl: m.thumbnailUrl,
+              }))}
+              selectedColorId={activeColor?.id ?? null}
+              selectedPatternId={selectedPatternId}
+              selectedModelId={modelId ?? null}
+              patternScale={patternScale}
+              onColor={(c) => setSelectedColorId(c.id)}
+              onPattern={setSelectedPatternId}
+              onModel={setSelectedModelId}
+              onScale={setPatternScale}
+            />
+            <SaveControls
+              lookId={lookId}
+              lookName={initial?.name}
+              previewRef={previewRef}
+              payload={{
+                garmentModelId: modelId,
+                colorId: activeColor?.id,
+                colorHex: activeColor?.hex,
+                patternId: selectedPatternId ?? undefined,
+                patternScale,
+              }}
+            />
+          </>
+        }
+      />
+    </>
   )
 }

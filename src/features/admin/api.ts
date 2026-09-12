@@ -122,7 +122,9 @@ export function useAllPatterns() {
   return useQuery({
     queryKey: ['admin', 'patterns', 'all'],
     queryFn: async () => {
-      const { data, error } = await api.GET('/admin/patterns', { params: { query: { limit: ALL_LIMIT } } })
+      const { data, error } = await api.GET('/admin/patterns', {
+        params: { query: { limit: ALL_LIMIT } },
+      })
       if (error || !data) throw error ?? new Error('Failed to load patterns')
       return data.items
     },
@@ -133,7 +135,9 @@ export function useAllColors() {
   return useQuery({
     queryKey: ['admin', 'colors', 'all'],
     queryFn: async () => {
-      const { data, error } = await api.GET('/admin/colors', { params: { query: { limit: ALL_LIMIT } } })
+      const { data, error } = await api.GET('/admin/colors', {
+        params: { query: { limit: ALL_LIMIT } },
+      })
       if (error || !data) throw error ?? new Error('Failed to load colors')
       return data.items
     },
@@ -144,7 +148,9 @@ export function useAllModels() {
   return useQuery({
     queryKey: ['admin', 'models', 'all'],
     queryFn: async () => {
-      const { data, error } = await api.GET('/admin/models', { params: { query: { limit: ALL_LIMIT } } })
+      const { data, error } = await api.GET('/admin/models', {
+        params: { query: { limit: ALL_LIMIT } },
+      })
       if (error || !data) throw error ?? new Error('Failed to load models')
       return data.items
     },

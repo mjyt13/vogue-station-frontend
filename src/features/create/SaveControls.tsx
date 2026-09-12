@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import type { MutableRefObject } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { getApiErrorMessage } from '../../shared/api'
 import type { CreateLookDto } from '../../shared/api'
+import { AuthPromptModal } from '../../shared/AuthPromptModal'
 import { Modal } from '../../shared/Modal'
 import { useAuth } from '../auth'
 import type { CaptureFn } from '../viewer'
@@ -11,6 +12,21 @@ import { useSaveLook, useUpdateLook, useUploadLookPreview } from './api'
 const debugPreview = (...args: unknown[]) => {
   if (import.meta.env.DEV) console.debug('[look-preview]', ...args)
 }
+
+const SESSION_ENDED_MESSAGE = 'Your session has ended.'
+
+// A 401 here means the access token was rejected server-side (the session
+// ended mid-edit — expired token, revoked refresh, etc.) even if the UI still
+// thought the user was signed in a moment ago. Detected by statusCode rather
+// than the backend's exact wording, which shouldn't leak to the user anyway.
+const isAuthError = (error: unknown): boolean =>
+  typeof error === 'object' &&
+  error !== null &&
+  'statusCode' in error &&
+  (error as { statusCode: unknown }).statusCode === 401
+
+const saveErrorMessage = (error: unknown): string =>
+  isAuthError(error) ? SESSION_ENDED_MESSAGE : getApiErrorMessage(error, 'Could not save the look')
 
 // Save controls for the editor:
 //  - editing an existing look → "Save" (update in place) + "Save as…" (new copy)
@@ -38,8 +54,10 @@ export function SaveControls({
   const update = useUpdateLook()
   const uploadPreview = useUploadLookPreview()
   const [open, setOpen] = useState(false)
+  const [authPromptOpen, setAuthPromptOpen] = useState(false)
   const [name, setName] = useState('')
   const [error, setError] = useState<string | null>(null)
+  const [needsLogin, setNeedsLogin] = useState(false)
 
   // Best-effort: a snapshot is a nice-to-have for the gallery/cabinet card, not
   // something that should block or fail a save.
@@ -58,6 +76,7 @@ export function SaveControls({
 
   const create = async () => {
     setError(null)
+    setNeedsLogin(false)
     try {
       const look = await save.mutateAsync({ ...payload, name: name.trim() })
       await capturePreview(look.id)
@@ -65,25 +84,28 @@ export function SaveControls({
       setName('')
       navigate(`/create?look=${look.id}`, { replace: true })
     } catch (e) {
-      setError(getApiErrorMessage(e, 'Could not save the look'))
+      setError(saveErrorMessage(e))
+      setNeedsLogin(isAuthError(e))
     }
   }
 
   const saveInPlace = async () => {
-    if (!authed) return navigate('/register')
+    if (!authed) return setAuthPromptOpen(true)
     if (!lookId) return
+    setError(null)
+    setNeedsLogin(false)
     try {
       await update.mutateAsync({ id: lookId, body: { ...payload, name: lookName ?? 'Untitled' } })
       await capturePreview(lookId)
-    } catch {
-      // update's own error/pending state already reflects the failure
+    } catch (e) {
+      setError(saveErrorMessage(e))
+      setNeedsLogin(isAuthError(e))
     }
   }
 
   const openSaveDialog = () => {
-    if (!authed) return navigate('/register')
+    if (!authed) return setAuthPromptOpen(true)
     setName('')
-    setError(null)
     setOpen(true)
   }
 
@@ -114,13 +136,26 @@ export function SaveControls({
         </button>
       </div>
 
+      {error && (
+        <p className="save-controls__error" role="alert">
+          {error}
+          {needsLogin && (
+            <>
+              {' '}
+              <Link to="/login">Log in</Link> to keep saving.
+            </>
+          )}
+        </p>
+      )}
+
+      <AuthPromptModal
+        open={authPromptOpen}
+        onOpenChange={setAuthPromptOpen}
+        message="To save your look, please register."
+      />
+
       <Modal open={open} onOpenChange={setOpen} title={lookId ? 'Save as a new look' : 'Save look'}>
         <p className="dialog-desc">Name this combination to find it in your cabinet.</p>
-        {error && (
-          <p className="dialog-error" role="alert">
-            {error}
-          </p>
-        )}
         <input
           className="dialog-input"
           placeholder="e.g. Navy stripes tee"

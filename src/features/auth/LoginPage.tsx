@@ -4,7 +4,7 @@ import { AuthForm } from './AuthForm'
 import { useAuth } from './useAuth'
 
 const schema = z.object({
-  email: z.string().email('Enter a valid email'),
+  email: z.email('Enter a valid email'),
   password: z.string().min(1, 'Password is required'),
 })
 
@@ -26,7 +26,12 @@ export function LoginPage() {
         errorFallback="Invalid email or password"
         fields={[
           { name: 'email', label: 'Email', type: 'email', autoComplete: 'email' },
-          { name: 'password', label: 'Password', type: 'password', autoComplete: 'current-password' },
+          {
+            name: 'password',
+            label: 'Password',
+            type: 'password',
+            autoComplete: 'current-password',
+          },
         ]}
         onSubmit={async (v) => {
           await login(v.email, v.password)

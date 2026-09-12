@@ -118,18 +118,6 @@
   margin: 0 0 34px;
 }
 
-.landing-plate figure {
-  margin: 0;
-  transform: rotate(-1.4deg);
-}
-
-.landing-preview {
-  display: block;
-  width: 100%;
-  height: auto;
-  box-shadow: var(--ed-shadow);
-}
-
 .landing-features {
   max-width: 1240px;
   width: 100%;

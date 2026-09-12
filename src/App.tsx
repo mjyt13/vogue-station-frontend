@@ -12,9 +12,7 @@ import { LandingPage } from './features/landing'
 
 // These two pull in three.js/@react-three/fiber (the bulk of the bundle) —
 // worth code-splitting since most routes never touch the 3D viewer.
-const CreatePage = lazy(() =>
-  import('./features/create').then((m) => ({ default: m.CreatePage })),
-)
+const CreatePage = lazy(() => import('./features/create').then((m) => ({ default: m.CreatePage })))
 // Imported from its own file, not the barrel: the barrel is also imported
 // statically (for GalleryPage) in this same file, which would defeat the
 // dynamic import and pull three.js back into the main chunk.

@@ -9,7 +9,11 @@ const RADIUS = SIZE / 2
 // center is saturation. Lightness isn't represented here — the picker keeps
 // a separate slider for that, same as most HSL wheel widgets. Simplest
 // control we could add for now; a nicer combined widget can replace it later.
-export const ColorWheel = (props: { hue: number; sat: number; onChange: (next: { h: number; s: number }) => void }) => {
+export const ColorWheel = (props: {
+  hue: number
+  sat: number
+  onChange: (next: { h: number; s: number }) => void
+}) => {
   const ref = useRef<HTMLDivElement>(null)
 
   const setFromPoint = (clientX: number, clientY: number) => {

@@ -1,12 +1,14 @@
 import { Bounds, Grid, OrbitControls } from '@react-three/drei'
+import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib'
 import { Canvas } from '@react-three/fiber'
-import { Suspense, useState } from 'react'
+import { Suspense, useRef, useState } from 'react'
 import type { MutableRefObject, ReactNode } from 'react'
 import { ErrorBoundary } from '../../shared/ErrorBoundary'
 import { Toggle } from '../../shared/Toggle'
 import { CapturePreview } from './CapturePreview'
 import type { CaptureFn } from './CapturePreview'
-import { INITIAL_TRANSFORM } from './config'
+import { INITIAL_LIGHT_POS, INITIAL_TRANSFORM } from './config'
+import { DraggableLight } from './DraggableLight'
 import { Model } from './Model'
 import { TransformPanel } from './TransformPanel'
 import { UVMap } from './UVMap'
@@ -22,11 +24,6 @@ const SCENE_TOGGLES: { key: keyof SceneOptions; label: string }[] = [
   { key: 'autoFrame', label: 'Auto-frame' },
   { key: 'light', label: 'Light source' },
 ]
-
-// Upper-front-right of the model, close enough to sit inside the default frame
-// so the "Light source" sphere is actually visible. (A directional light's
-// distance doesn't affect brightness — only its direction — so near is fine.)
-const LIGHT_POS: [number, number, number] = [1.3, 1.6, 1.8]
 
 // The viewer renders a garment (given a GarmentMaterial) in a controllable 3D
 // scene. It owns the transform + scene-option state; the material comes from the
@@ -52,6 +49,8 @@ export function Viewer({
 }) {
   const [transform, setTransform] = useState<Transform>(INITIAL_TRANSFORM)
   const [scene, setScene] = useState<SceneOptions>(INITIAL_SCENE)
+  const [lightPos, setLightPos] = useState<[number, number, number]>(INITIAL_LIGHT_POS)
+  const orbitRef = useRef<OrbitControlsImpl | null>(null)
 
   // One function handles all 6 actions: which group, which axis, new value.
   const setAxis = (kind: Kind, axis: Axis, value: number) =>
@@ -92,38 +91,40 @@ export function Viewer({
               </div>
             )}
           >
-            <Canvas
-              camera={{ position: [0, 1, 5], fov: 50 }}
-              gl={{ preserveDrawingBuffer: true }}
-            >
-            {previewRef && <CapturePreview captureRef={previewRef} />}
-            <color attach="background" args={['#2b2f3a']} />
-            <ambientLight intensity={0.6} />
-            <directionalLight position={LIGHT_POS} intensity={1.2} />
-            {scene.light && (
-              <mesh position={LIGHT_POS}>
-                <sphereGeometry args={[0.25, 20, 20]} />
-                <meshBasicMaterial color="#fff3c0" />
-              </mesh>
-            )}
-            <Grid
-              position={[0, -1, 0]}
-              args={[10, 10]}
-              cellColor="#4a5060"
-              sectionColor="#8a93a6"
-              fadeDistance={30}
-              infiniteGrid
-            />
-            <Suspense fallback={null}>
-              {scene.autoFrame ? (
-                <Bounds fit clip observe margin={1.2}>
-                  {model}
-                </Bounds>
-              ) : (
-                model
-              )}
-            </Suspense>
-            <OrbitControls makeDefault enableDamping enablePan={scene.pan} target={[0, 0, 0]} />
+            <Canvas camera={{ position: [0, 1, 5], fov: 50 }} gl={{ preserveDrawingBuffer: true }}>
+              {previewRef && <CapturePreview captureRef={previewRef} />}
+              <color attach="background" args={['#2b2f3a']} />
+              <ambientLight intensity={0.6} />
+              <DraggableLight
+                position={lightPos}
+                onChange={setLightPos}
+                draggable={scene.light}
+                controlsRef={orbitRef}
+              />
+              <Grid
+                position={[0, -1, 0]}
+                args={[10, 10]}
+                cellColor="#4a5060"
+                sectionColor="#8a93a6"
+                fadeDistance={30}
+                infiniteGrid
+              />
+              <Suspense fallback={null}>
+                {scene.autoFrame ? (
+                  <Bounds fit clip observe margin={1.2}>
+                    {model}
+                  </Bounds>
+                ) : (
+                  model
+                )}
+              </Suspense>
+              <OrbitControls
+                ref={orbitRef}
+                makeDefault
+                enableDamping
+                enablePan={scene.pan}
+                target={[0, 0, 0]}
+              />
             </Canvas>
           </ErrorBoundary>
         </div>
