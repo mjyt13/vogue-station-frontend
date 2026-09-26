@@ -44,7 +44,7 @@
 
 .studio-notes__board {
   position: relative;
-  min-height: 920px;
+  min-height: 580px;
 }
 
 /* Real product screenshots, clipped into a jagged "torn from a magazine"
@@ -188,8 +188,8 @@
 .tear--3 {
   --tear-rot: -3deg;
   --tear-delay: 0.24s;
-  top: 360px;
-  left: 4%;
+  top: 60px;
+  left: 66%;
   width: 280px;
 }
 .tear--3 img {
@@ -228,7 +228,7 @@
 .tear--4 {
   --tear-rot: 5deg;
   --tear-delay: 0.36s;
-  top: 300px;
+  top: 390px;
   left: 54%;
   width: 340px;
 }
@@ -268,9 +268,9 @@
 .tear--5 {
   --tear-rot: -8deg;
   --tear-delay: 0.48s;
-  top: 640px;
-  left: 33%;
-  width: 230px;
+  top: 380px;
+  left: 6%;
+  width: 300px;
 }
 .tear--5 img {
   clip-path: polygon(
