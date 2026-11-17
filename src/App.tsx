@@ -9,6 +9,7 @@ import { CabinetPage } from './features/cabinet'
 // three.js with it) back into the main chunk despite the dynamic import below.
 import { GalleryPage } from './features/gallery/GalleryPage'
 import { LandingPage } from './features/landing'
+import { ErrorBoundary } from './shared/ErrorBoundary'
 
 // These two pull in three.js/@react-three/fiber (the bulk of the bundle) —
 // worth code-splitting since most routes never touch the 3D viewer.
@@ -27,39 +28,59 @@ const GalleryLookPage = lazy(() =>
 // the app shell behind RequireAuth.
 function App() {
   return (
-    <Routes>
-      <Route path="/" element={<LandingPage />} />
-      <Route element={<PublicOnly />}>
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
-      </Route>
-      <Route element={<AppLayout />}>
-        <Route
-          path="/create"
-          element={
-            <Suspense fallback={<div className="auth-loading">Loading…</div>}>
-              <CreatePage />
-            </Suspense>
-          }
-        />
-        <Route element={<RequireAuth />}>
-          <Route path="/cabinet" element={<CabinetPage />} />
-          <Route path="/gallery" element={<GalleryPage />} />
+    <ErrorBoundary
+      fallback={(reset) => (
+        <div className="app-error-screen">
+          <div className="app-error-card">
+            <h2>Не удалось загрузить страницу</h2>
+            <p>Произошла непредвиденная ошибка при загрузке. Попробуйте обновить страницу.</p>
+            <button
+              type="button"
+              onClick={() => {
+                reset()
+                window.location.reload()
+              }}
+            >
+              Обновить
+            </button>
+          </div>
+        </div>
+      )}
+    >
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route element={<PublicOnly />}>
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+        </Route>
+        <Route element={<AppLayout />}>
           <Route
-            path="/gallery/:lookId"
+            path="/create"
             element={
               <Suspense fallback={<div className="auth-loading">Loading…</div>}>
-                <GalleryLookPage />
+                <CreatePage />
               </Suspense>
             }
           />
-          <Route element={<RequireAdmin />}>
-            <Route path="/admin" element={<AdminPage />} />
+          <Route element={<RequireAuth />}>
+            <Route path="/cabinet" element={<CabinetPage />} />
+            <Route path="/gallery" element={<GalleryPage />} />
+            <Route
+              path="/gallery/:lookId"
+              element={
+                <Suspense fallback={<div className="auth-loading">Loading…</div>}>
+                  <GalleryLookPage />
+                </Suspense>
+              }
+            />
+            <Route element={<RequireAdmin />}>
+              <Route path="/admin" element={<AdminPage />} />
+            </Route>
           </Route>
         </Route>
-      </Route>
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </ErrorBoundary>
   )
 }
 

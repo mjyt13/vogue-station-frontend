@@ -26,3 +26,37 @@
   color: var(--ed-muted);
   max-width: 240px;
 }
+
+.uv-map--error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 240px;
+  text-align: center;
+}
+
+.uv-map-error__content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  align-items: center;
+}
+
+.uv-map-error__content p {
+  margin: 0;
+  font-family: var(--ed-font-body);
+  font-size: 0.82rem;
+  color: var(--ed-muted);
+}
+
+.uv-map-error__content button {
+  padding: 4px 12px;
+  font: inherit;
+  font-family: var(--ed-font-body);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--ed-accent-fg);
+  background: var(--ed-accent);
+  border: none;
+  cursor: pointer;
+}

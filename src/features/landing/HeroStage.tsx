@@ -1,4 +1,4 @@
-import { Grid, OrbitControls } from '@react-three/drei'
+import { Grid, Html, OrbitControls, useGLTF } from '@react-three/drei'
 import { Canvas } from '@react-three/fiber'
 import { Suspense, useRef, useState } from 'react'
 import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib'
@@ -6,6 +6,7 @@ import checksUrl from '../../assets/patterns/checks.png'
 import dotsUrl from '../../assets/patterns/dots.png'
 import gridUrl from '../../assets/patterns/grid.png'
 import stripesUrl from '../../assets/patterns/stripes.png'
+import { ErrorBoundary } from '../../shared/ErrorBoundary'
 import { DraggableLight, INITIAL_LIGHT_POS, INITIAL_TRANSFORM, Model } from '../viewer'
 import { PATTERN_SCALE } from '../wardrobe/config'
 import './HeroStage.css'
@@ -46,36 +47,74 @@ export function HeroStage({ modelUrl }: { modelUrl: string }) {
   return (
     <div className="hero-stage">
       <div className="hero-stage__canvas">
-        <Canvas camera={{ position: [0, 1, 5], fov: 50 }}>
-          <color attach="background" args={['#2b2f3a']} />
-          <ambientLight intensity={0.6} />
-          <DraggableLight
-            position={lightPos}
-            onChange={setLightPos}
-            draggable={lightOn}
-            controlsRef={orbitRef}
-          />
-          <Grid
-            position={[0, -1, 0]}
-            args={[10, 10]}
-            cellColor="#4a5060"
-            sectionColor="#8a93a6"
-            fadeDistance={30}
-            infiniteGrid
-          />
-          <Suspense fallback={null}>
-            <Model
-              url={modelUrl}
-              transform={INITIAL_TRANSFORM}
-              material={{
-                color: activeColor.hex,
-                patternUrl: activePattern?.url ?? null,
-                patternScale: PATTERN_SCALE.default,
-              }}
+        <ErrorBoundary
+          resetKeys={[modelUrl]}
+          fallback={(reset) => (
+            <div className="viewport-error">
+              <p>Не удалось загрузить 3D-сцену</p>
+              <button
+                type="button"
+                onClick={() => {
+                  useGLTF.clear(modelUrl)
+                  reset()
+                }}
+              >
+                Повторить
+              </button>
+            </div>
+          )}
+        >
+          <Canvas camera={{ position: [0, 1, 5], fov: 50 }}>
+            <color attach="background" args={['#2b2f3a']} />
+            <ambientLight intensity={0.6} />
+            <DraggableLight
+              position={lightPos}
+              onChange={setLightPos}
+              draggable={lightOn}
+              controlsRef={orbitRef}
             />
-          </Suspense>
-          <OrbitControls ref={orbitRef} makeDefault enableDamping target={[0, 0, 0]} />
-        </Canvas>
+            <Grid
+              position={[0, -1, 0]}
+              args={[10, 10]}
+              cellColor="#4a5060"
+              sectionColor="#8a93a6"
+              fadeDistance={30}
+              infiniteGrid
+            />
+            <ErrorBoundary
+              resetKeys={[modelUrl]}
+              fallback={(reset) => (
+                <Html center>
+                  <div className="canvas-error">
+                    <p>Не удалось загрузить модели</p>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        useGLTF.clear(modelUrl)
+                        reset()
+                      }}
+                    >
+                      Повторить
+                    </button>
+                  </div>
+                </Html>
+              )}
+            >
+              <Suspense fallback={null}>
+                <Model
+                  url={modelUrl}
+                  transform={INITIAL_TRANSFORM}
+                  material={{
+                    color: activeColor.hex,
+                    patternUrl: activePattern?.url ?? null,
+                    patternScale: PATTERN_SCALE.default,
+                  }}
+                />
+              </Suspense>
+            </ErrorBoundary>
+            <OrbitControls ref={orbitRef} makeDefault enableDamping target={[0, 0, 0]} />
+          </Canvas>
+        </ErrorBoundary>
         <button
           type="button"
           className={`hero-stage__light${lightOn ? ' hero-stage__light--on' : ''}`}

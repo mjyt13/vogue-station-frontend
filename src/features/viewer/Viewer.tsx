@@ -1,4 +1,4 @@
-import { Bounds, Grid, OrbitControls } from '@react-three/drei'
+import { Bounds, Grid, Html, OrbitControls, useGLTF } from '@react-three/drei'
 import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib'
 import { Canvas } from '@react-three/fiber'
 import { Suspense, useRef, useState } from 'react'
@@ -73,9 +73,29 @@ export function Viewer({
           ))}
         </div>
         <TransformPanel transform={transform} onChange={setAxis} />
-        <Suspense fallback={null}>
-          <UVMap url={modelUrl} material={material} />
-        </Suspense>
+        <ErrorBoundary
+          resetKeys={[modelUrl]}
+          fallback={(reset) => (
+            <div className="uv-map uv-map--error">
+              <div className="uv-map-error__content">
+                <p>Не удалось загрузить развёртку</p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    useGLTF.clear(modelUrl)
+                    reset()
+                  }}
+                >
+                  Повторить
+                </button>
+              </div>
+            </div>
+          )}
+        >
+          <Suspense fallback={null}>
+            <UVMap url={modelUrl} material={material} />
+          </Suspense>
+        </ErrorBoundary>
       </div>
 
       <div className="workspace__viewport">
@@ -84,9 +104,15 @@ export function Viewer({
             resetKeys={[modelUrl]}
             fallback={(reset) => (
               <div className="viewport-error">
-                <p>Couldn’t load the 3D preview.</p>
-                <button type="button" onClick={reset}>
-                  Retry
+                <p>Не удалось загрузить 3D-сцену</p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    useGLTF.clear(modelUrl)
+                    reset()
+                  }}
+                >
+                  Повторить
                 </button>
               </div>
             )}
@@ -109,15 +135,35 @@ export function Viewer({
                 fadeDistance={30}
                 infiniteGrid
               />
-              <Suspense fallback={null}>
-                {scene.autoFrame ? (
-                  <Bounds fit clip observe margin={1.2}>
-                    {model}
-                  </Bounds>
-                ) : (
-                  model
+              <ErrorBoundary
+                resetKeys={[modelUrl]}
+                fallback={(reset) => (
+                  <Html center>
+                    <div className="canvas-error">
+                      <p>Не удалось загрузить модели</p>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          useGLTF.clear(modelUrl)
+                          reset()
+                        }}
+                      >
+                        Повторить
+                      </button>
+                    </div>
+                  </Html>
                 )}
-              </Suspense>
+              >
+                <Suspense fallback={null}>
+                  {scene.autoFrame ? (
+                    <Bounds fit clip observe margin={1.2}>
+                      {model}
+                    </Bounds>
+                  ) : (
+                    model
+                  )}
+                </Suspense>
+              </ErrorBoundary>
               <OrbitControls
                 ref={orbitRef}
                 makeDefault
